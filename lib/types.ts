@@ -33,21 +33,29 @@ export interface ImageEl extends BaseEl {
   assetId: string;
   radius?: number;
   frame?: Frame;
+  /** Retro date stamp from the photo's EXIF date (Creator+). */
   stamp?: boolean;
 }
 
+/** Template placeholder; renders like an image once it has an asset. */
 export interface SlotEl extends BaseEl {
   type: "slot";
   assetId?: string;
   radius?: number;
   frame?: Frame;
+  stamp?: boolean;
 }
+
+/** Keys of the fonts loaded in app/fonts.ts; resolved to real family names at render time. */
+export type FontKey = "inter" | "playfair" | "space" | "caveat" | "pixelify" | "vt323";
 
 export interface TextEl extends BaseEl {
   type: "text";
   text: string;
-  fontFamily: string;
+  fontFamily: FontKey;
   fontSize: number;
+  /** Konva fontStyle: 'normal' | 'bold' | 'italic' | '600' … */
+  fontStyle?: string;
   fill: string;
   align: "left" | "center" | "right";
   bubble?: boolean;
@@ -58,7 +66,14 @@ export interface StickerEl extends BaseEl {
   src: string;
 }
 
-export type El = ImageEl | SlotEl | TextEl | StickerEl;
+/** Plain rectangle, e.g. palette chips on the month cover. */
+export interface ShapeEl extends BaseEl {
+  type: "shape";
+  fill: string;
+  radius?: number;
+}
+
+export type El = ImageEl | SlotEl | TextEl | StickerEl | ShapeEl;
 
 export interface DumpDoc {
   id: string;

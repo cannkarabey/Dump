@@ -1,0 +1,88 @@
+{
+ "id": "polaroid-scatter",
+ "title": "Polaroid Dağınık",
+ "tier": "free",
+ "mode": "carousel",
+ "pages": 3,
+ "background": "#efe9df",
+ "tags": [
+  "polaroid",
+  "warm",
+  "seamless"
+ ],
+ "elements": [
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.08,
+   "ny": 0.08,
+   "nw": 0.5,
+   "nh": 0.5,
+   "rotation": -6,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.3,
+   "ny": 0.46,
+   "nw": 0.46,
+   "nh": 0.46,
+   "rotation": 5,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.76,
+   "ny": 0.18,
+   "nw": 0.46,
+   "nh": 0.46,
+   "rotation": 3,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.32,
+   "ny": 0.56,
+   "nw": 0.5,
+   "nh": 0.4,
+   "rotation": -4,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.12,
+   "ny": 0.1,
+   "nw": 0.5,
+   "nh": 0.46,
+   "rotation": 4,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.42,
+   "ny": 0.5,
+   "nw": 0.48,
+   "nh": 0.42,
+   "rotation": -5,
+   "frame": "polaroid"
+  },
+  {
+   "type": "text",
+   "page": 2,
+   "nx": 0.1,
+   "ny": 0.92,
+   "nw": 0.8,
+   "nh": 0.06,
+   "text": "{{month}} dump",
+   "font": "caveat",
+   "nfs": 0.05,
+   "fill": "#3b3b3b",
+   "align": "center"
+  }
+ ]
+}

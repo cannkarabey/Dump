@@ -1,0 +1,96 @@
+{
+ "id": "filmstrip-3",
+ "title": "Film Şeridi",
+ "tier": "creator",
+ "mode": "carousel",
+ "pages": 3,
+ "background": "#141414",
+ "tags": [
+  "film",
+  "dark",
+  "retro"
+ ],
+ "elements": [
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.12,
+   "ny": 0.04,
+   "nw": 0.76,
+   "nh": 0.28,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.12,
+   "ny": 0.36,
+   "nw": 0.76,
+   "nh": 0.28,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.12,
+   "ny": 0.68,
+   "nw": 0.76,
+   "nh": 0.28,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.12,
+   "ny": 0.04,
+   "nw": 0.76,
+   "nh": 0.28,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.12,
+   "ny": 0.36,
+   "nw": 0.76,
+   "nh": 0.28,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.12,
+   "ny": 0.68,
+   "nw": 0.76,
+   "nh": 0.28,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.12,
+   "ny": 0.04,
+   "nw": 0.76,
+   "nh": 0.28,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.12,
+   "ny": 0.36,
+   "nw": 0.76,
+   "nh": 0.28,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.12,
+   "ny": 0.68,
+   "nw": 0.76,
+   "nh": 0.28,
+   "frame": "film"
+  }
+ ]
+}

@@ -1,0 +1,41 @@
+{
+ "id": "big-plus-two",
+ "title": "Büyük + İki",
+ "tier": "free",
+ "mode": "single",
+ "pages": 1,
+ "background": "#f6f3ee",
+ "tags": [
+  "grid",
+  "clean"
+ ],
+ "elements": [
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.05,
+   "ny": 0.05,
+   "nw": 0.9,
+   "nh": 0.58,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.05,
+   "ny": 0.655,
+   "nw": 0.4375,
+   "nh": 0.295,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.5125,
+   "ny": 0.655,
+   "nw": 0.4375,
+   "nh": 0.295,
+   "nradius": 0.015
+  }
+ ]
+}

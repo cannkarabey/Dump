@@ -1,9 +1,28 @@
 import type Konva from "konva";
-import { pageOf, useDoc } from "@/lib/store/doc";
+import { pageOf, useDoc, type ElPatch } from "@/lib/store/doc";
 import { useUi } from "@/lib/store/ui";
 import type { El } from "@/lib/types";
 
 const MIN_SIZE = 20;
+
+/** Bakes the node's scale into width/height so crops and frames stay crisp. */
+export function bakeSize(node: Konva.Node) {
+  const width = Math.max(MIN_SIZE, node.width() * node.scaleX());
+  const height = Math.max(MIN_SIZE, node.height() * node.scaleY());
+  node.setAttrs({ width, height, scaleX: 1, scaleY: 1 });
+  return { width, height };
+}
+
+/** Turns a transformed node back into a doc patch; text scales its font instead of its box. */
+function transformPatch(node: Konva.Node, el: El): ElPatch {
+  const pos = { x: node.x(), y: node.y(), rotation: node.rotation() };
+  if (el.type === "text") {
+    const scale = node.scaleX();
+    node.scale({ x: 1, y: 1 });
+    return { ...pos, fontSize: el.fontSize * scale, width: el.width * scale };
+  }
+  return { ...pos, ...bakeSize(node) };
+}
 
 /** Selection, drag and transform handlers shared by every element node. */
 export function useElementHandlers(el: El) {
@@ -36,20 +55,14 @@ export function useElementHandlers(el: El) {
     useUi.getState().setActivePage(pageOf({ x: e.target.x(), width: el.width }, format.w, format.pages));
   };
 
-  /** Bakes scale into width/height so crops and strokes stay crisp. */
-  const bake = (node: Konva.Node) => {
-    const width = Math.max(MIN_SIZE, node.width() * node.scaleX());
-    const height = Math.max(MIN_SIZE, node.height() * node.scaleY());
-    node.setAttrs({ width, height, scaleX: 1, scaleY: 1 });
-    return { x: node.x(), y: node.y(), width, height, rotation: node.rotation() };
-  };
-
   const onTransformEnd = (e: Konva.KonvaEventObject<Event>) => {
     const stage = e.target.getStage();
     if (!stage) return;
+    const { elements } = useDoc.getState().doc;
     const patches = groupIds().flatMap((id) => {
       const node = stage.findOne(`#${id}`);
-      return node ? [{ id, patch: bake(node) }] : [];
+      const target = elements.find((x) => x.id === id);
+      return node && target ? [{ id, patch: transformPatch(node, target) }] : [];
     });
     useDoc.getState().updateElements(patches);
   };
@@ -62,6 +75,5 @@ export function useElementHandlers(el: El) {
     onTap: select,
     onDragEnd,
     onTransformEnd,
-    bake,
   };
 }

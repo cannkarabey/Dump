@@ -9,7 +9,10 @@ import { useUi, ZOOM_MAX, ZOOM_MIN } from "@/lib/store/ui";
 import { stageRef } from "@/lib/stageRef";
 import { importFiles, placeOnCanvas } from "@/lib/importFiles";
 import { ASSET_DRAG_TYPE } from "../panels/UploadPanel";
-import { ImageNode } from "./ImageNode";
+import { loadEditorFonts } from "@/lib/fonts";
+import { PhotoNode } from "./PhotoNode";
+import { TextNode } from "./TextNode";
+import { ShapeNode } from "./ShapeNode";
 import { SelectionTransformer } from "./SelectionTransformer";
 import type { El } from "@/lib/types";
 
@@ -41,6 +44,12 @@ export default function CanvasStage() {
     );
     ro.observe(el);
     return () => ro.disconnect();
+  }, []);
+
+  // ---- webfonts: Konva measures text when attrs change, so remount the content layer once fonts load.
+  const [fontsReady, setFontsReady] = useState(false);
+  useEffect(() => {
+    void loadEditorFonts().then(() => setFontsReady(true));
   }, []);
 
   // ---- zoom & pan
@@ -152,7 +161,7 @@ export default function CanvasStage() {
     if (!asset || !pos) return;
 
     // Dropped onto a slot → fill it; anywhere else → place centered on the pointer.
-    const hit = stage.getIntersection(stage.getPointerPosition()!);
+    const hit = stage.getIntersection(stage.getPointerPosition()!)?.findAncestor(".element", true);
     const hitEl = hit && useDoc.getState().doc.elements.find((el) => el.id === hit.id());
     if (hitEl?.type === "slot") {
       useDoc.getState().updateElement(hitEl.id, { assetId });
@@ -206,7 +215,14 @@ export default function CanvasStage() {
             />
           </Layer>
 
-          <Layer name="content" clipX={0} clipY={0} clipWidth={totalW} clipHeight={h}>
+          <Layer
+            key={fontsReady ? "fonts" : "fallback"}
+            name="content"
+            clipX={0}
+            clipY={0}
+            clipWidth={totalW}
+            clipHeight={h}
+          >
             {doc.elements.map((el) => (
               <ElementNode key={el.id} el={el} single={selection.length === 1} draggable={!spaceDown} />
             ))}
@@ -246,8 +262,13 @@ export default function CanvasStage() {
 function ElementNode({ el, single, draggable }: { el: El; single: boolean; draggable: boolean }) {
   switch (el.type) {
     case "image":
-      return <ImageNode el={el} single={single} draggable={draggable} />;
-    // Slots (S1.8), text and stickers (S1.13) render once their tasks land.
+    case "slot":
+      return <PhotoNode el={el} single={single} draggable={draggable} />;
+    case "text":
+      return <TextNode el={el} draggable={draggable} />;
+    case "shape":
+      return <ShapeNode el={el} draggable={draggable} />;
+    // Stickers render once the sticker panel lands in S1.13.
     default:
       return null;
   }

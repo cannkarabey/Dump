@@ -1,16 +1,16 @@
 "use client";
 
 import * as Tabs from "@radix-ui/react-tabs";
-import { MousePointerClick, Smartphone, Sparkles } from "lucide-react";
+import { MousePointerClick, Sparkles } from "lucide-react";
 import { useUi, type RightTab } from "@/lib/store/ui";
-import { useDoc } from "@/lib/store/doc";
-import { presetLabel } from "@/lib/presets";
 import { cn } from "@/lib/cn";
+import { DocProperties } from "./properties/DocProperties";
+import { ElementProperties } from "./properties/ElementProperties";
 
 export function RightPanel() {
   const tab = useUi((s) => s.rightTab);
   const setTab = useUi((s) => s.setRightTab);
-  const format = useDoc((s) => s.doc.format);
+  const selection = useUi((s) => s.selection);
 
   return (
     <Tabs.Root
@@ -26,30 +26,22 @@ export function RightPanel() {
         </TabTrigger>
       </Tabs.List>
 
-      <Tabs.Content value="properties" className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4">
-        <section className="rounded-2xl bg-hover p-3">
-          <h3 className="mb-2 text-sm font-semibold">Canvas</h3>
-          <div className="flex items-center gap-3 rounded-xl bg-card p-3">
-            <Smartphone size={18} className="text-muted" />
-            <div>
-              <p className="text-sm font-medium">{presetLabel(format.w, format.h)}</p>
-              <p className="text-xs text-muted tabular-nums">
-                {format.w} × {format.h} px
-                {format.mode === "carousel" && ` · ${format.pages} sayfa`}
+      <Tabs.Content value="properties" className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pb-4">
+        {selection.length ? (
+          <ElementProperties ids={selection} />
+        ) : (
+          <>
+            <DocProperties />
+            <div className="mt-auto flex flex-col items-center gap-2 pt-8 text-center">
+              <span className="grid size-10 place-items-center rounded-2xl bg-hover text-muted">
+                <MousePointerClick size={18} />
+              </span>
+              <p className="max-w-56 text-xs text-muted">
+                Boyut, döndürme, opaklık ve çerçeve için canvas&apos;ta bir öğeye tıkla.
               </p>
             </div>
-          </div>
-        </section>
-
-        <div className="mt-auto flex flex-col items-center gap-2 py-10 text-center">
-          <span className="grid size-12 place-items-center rounded-2xl bg-hover text-muted">
-            <MousePointerClick size={20} />
-          </span>
-          <p className="text-sm font-semibold">Hiçbir şey seçili değil</p>
-          <p className="max-w-56 text-xs text-muted">
-            Boyut, döndürme, opaklık ve daha fazlasını düzenlemek için canvas&apos;ta bir öğeye tıkla.
-          </p>
-        </div>
+          </>
+        )}
       </Tabs.Content>
 
       <Tabs.Content value="assistant" className="flex min-h-0 flex-1 flex-col px-4 pb-4">

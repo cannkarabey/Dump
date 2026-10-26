@@ -40,7 +40,11 @@ interface DocState {
   bringForward: (id: string) => void;
   sendBackward: (id: string) => void;
   addPage: () => void;
+  /** Inserts a copy of page `index` right after it. */
+  duplicatePage: (index: number) => void;
   removePage: (index: number) => void;
+  /** Changes the page size, re-laying out elements proportionally. */
+  resize: (w: number, h: number) => void;
 }
 
 /** Applies the patch only when it changes something, so no-op drags don't create history entries. */
@@ -124,7 +128,44 @@ export const useDoc = create<DocState>()(
             return { ...d, elements };
           }),
 
-        addPage: () => commit((d) => ({ ...d, format: { ...d.format, pages: d.format.pages + 1 } })),
+        // A single post becomes a carousel once it has more than one page.
+        addPage: () =>
+          commit((d) => ({ ...d, format: { ...d.format, mode: "carousel", pages: d.format.pages + 1 } })),
+
+        duplicatePage: (index) =>
+          commit((d) => {
+            const { w } = d.format;
+            const onPage = d.elements.filter((el) => pageOf(el, w, d.format.pages) === index);
+            const shifted = d.elements.map((el) =>
+              pageOf(el, w, d.format.pages) > index ? { ...el, x: el.x + w } : el,
+            );
+            const copies = onPage.map((el) => ({ ...el, id: nanoid(10), x: el.x + w }));
+            return {
+              ...d,
+              elements: [...shifted, ...copies],
+              format: { ...d.format, mode: "carousel", pages: d.format.pages + 1 },
+            };
+          }),
+
+        resize: (w, h) =>
+          commit((d) => {
+            const { w: ow, h: oh, pages } = d.format;
+            if (ow === w && oh === h) return d;
+            const sx = w / ow;
+            const sy = h / oh;
+            // Positions follow the page proportionally; sizes scale uniformly so photos don't distort.
+            const s = Math.min(sx, sy);
+            const elements = d.elements.map((el) => {
+              const page = pageOf(el, ow, pages);
+              const cx = (el.x + el.width / 2 - page * ow) * sx + page * w;
+              const cy = (el.y + el.height / 2) * sy;
+              const width = el.width * s;
+              const height = el.height * s;
+              const scaled = { ...el, x: cx - width / 2, y: cy - height / 2, width, height };
+              return el.type === "text" ? { ...scaled, fontSize: el.fontSize * s } : scaled;
+            });
+            return { ...d, elements, format: { ...d.format, w, h } };
+          }),
 
         removePage: (index) =>
           commit((d) => {
@@ -139,7 +180,8 @@ export const useDoc = create<DocState>()(
                 return cx < left || cx >= right;
               })
               .map((el) => (el.x >= right ? { ...el, x: el.x - w } : el));
-            return { ...d, elements, format: { ...d.format, pages: d.format.pages - 1 } };
+            const pages = d.format.pages - 1;
+            return { ...d, elements, format: { ...d.format, pages, mode: pages === 1 ? "single" : d.format.mode } };
           }),
       };
     },

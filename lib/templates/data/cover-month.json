@@ -1,0 +1,104 @@
+{
+ "id": "cover-month",
+ "title": "Ay Kapağı",
+ "tier": "free",
+ "mode": "carousel",
+ "pages": 4,
+ "background": "#f3ece2",
+ "tags": [
+  "monthly",
+  "cover"
+ ],
+ "elements": [
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.05,
+   "nw": 0.88,
+   "nh": 0.13,
+   "text": "{{month}}",
+   "font": "playfair",
+   "nfs": 0.11,
+   "fill": "#1d1d1f",
+   "align": "left",
+   "fontStyle": "bold"
+  },
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.18,
+   "nw": 0.6,
+   "nh": 0.08,
+   "text": "dump",
+   "font": "caveat",
+   "nfs": 0.075,
+   "fill": "#7c5cff",
+   "align": "left"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.3,
+   "nw": 0.88,
+   "nh": 0.64,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.06,
+   "ny": 0.05,
+   "nw": 0.88,
+   "nh": 0.43,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.06,
+   "ny": 0.52,
+   "nw": 0.88,
+   "nh": 0.43,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.06,
+   "ny": 0.05,
+   "nw": 0.88,
+   "nh": 0.43,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.06,
+   "ny": 0.52,
+   "nw": 0.88,
+   "nh": 0.43,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 3,
+   "nx": 0.06,
+   "ny": 0.05,
+   "nw": 0.88,
+   "nh": 0.43,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 3,
+   "nx": 0.06,
+   "ny": 0.52,
+   "nw": 0.88,
+   "nh": 0.43,
+   "nradius": 0.02
+  }
+ ]
+}

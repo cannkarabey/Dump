@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Cloud, Download, Minus, Plus, Redo2, Undo2 } from "lucide-react";
+import { Cloud, Download, Minus, Plus, Redo2, Sparkles, Undo2 } from "lucide-react";
+import { runMonthDump } from "@/lib/runMonthDump";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { Tooltip } from "@/components/ui/Tooltip";
@@ -78,6 +79,12 @@ export function TopBar() {
         </IconButton>
       </div>
 
+      <Tooltip content="Fotoğrafları tarihe göre sırala, ay kapağı ve renk paleti oluştur">
+        <Button variant="secondary" size="sm" onClick={runMonthDump}>
+          <Sparkles size={15} className="text-accent" />
+          Ayın Dump&apos;ı
+        </Button>
+      </Tooltip>
       {DEV && <DevTierToggle />}
       <span
         className={cn(

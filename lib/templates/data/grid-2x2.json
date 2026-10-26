@@ -1,0 +1,50 @@
+{
+ "id": "grid-2x2",
+ "title": "2×2 Izgara",
+ "tier": "free",
+ "mode": "single",
+ "pages": 1,
+ "background": "#ffffff",
+ "tags": [
+  "grid",
+  "minimal"
+ ],
+ "elements": [
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.05,
+   "ny": 0.05,
+   "nw": 0.4375,
+   "nh": 0.4375,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.5125,
+   "ny": 0.05,
+   "nw": 0.4375,
+   "nh": 0.4375,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.05,
+   "ny": 0.5125,
+   "nw": 0.4375,
+   "nh": 0.4375,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.5125,
+   "ny": 0.5125,
+   "nw": 0.4375,
+   "nh": 0.4375,
+   "nradius": 0.015
+  }
+ ]
+}

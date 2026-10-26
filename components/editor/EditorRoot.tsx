@@ -12,6 +12,7 @@ import { FlyoutPanel } from "./FlyoutPanel";
 import { CanvasArea } from "./CanvasArea";
 import { RightPanel } from "./RightPanel";
 import { NewDumpModal } from "./NewDumpModal";
+import { PaywallModal } from "./PaywallModal";
 
 export function EditorRoot({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -40,6 +41,7 @@ export function EditorRoot({ params }: { params: Promise<{ id: string }> }) {
         <RightPanel />
       </div>
       <NewDumpModal />
+      <PaywallModal />
     </TooltipProvider>
   );
 }

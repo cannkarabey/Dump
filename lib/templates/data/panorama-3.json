@@ -1,0 +1,50 @@
+{
+ "id": "panorama-3",
+ "title": "Panorama",
+ "tier": "creator",
+ "mode": "carousel",
+ "pages": 3,
+ "background": "#ffffff",
+ "tags": [
+  "seamless",
+  "panorama"
+ ],
+ "elements": [
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.05,
+   "ny": 0.06,
+   "nw": 2.9,
+   "nh": 0.58,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.05,
+   "ny": 0.68,
+   "nw": 0.9,
+   "nh": 0.27,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.05,
+   "ny": 0.68,
+   "nw": 0.9,
+   "nh": 0.27,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.05,
+   "ny": 0.68,
+   "nw": 0.9,
+   "nh": 0.27,
+   "nradius": 0.02
+  }
+ ]
+}
