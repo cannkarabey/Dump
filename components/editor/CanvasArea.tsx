@@ -1,21 +1,32 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useUi } from "@/lib/store/ui";
 
-// Placeholder format until the doc store lands in S1.4; Konva replaces the artboard in S1.6.
-const FORMAT = { w: 1080, h: 1440 };
+// Konva touches `window`, so the stage only ever renders in the browser.
+const CanvasStage = dynamic(() => import("./canvas/CanvasStage"), {
+  ssr: false,
+  loading: () => <div className="grid size-full place-items-center text-sm text-muted">Canvas yükleniyor…</div>,
+});
 
 export function CanvasArea() {
-  const zoom = useUi((s) => s.zoom);
+  const notice = useUi((s) => s.notice);
+  const showNotice = useUi((s) => s.showNotice);
 
   return (
-    // flex + m-auto (not place-items-center) so an artboard taller than the viewport scrolls instead of clipping.
-    <main className="relative flex min-h-0 overflow-auto rounded-[var(--radius-panel)] bg-canvas p-8">
-      <div
-        className="m-auto shrink-0 bg-white shadow-[0_8px_24px_-8px_#0000004d]"
-        style={{ width: FORMAT.w * zoom, height: FORMAT.h * zoom }}
-        aria-label="Çalışma alanı"
-      />
+    <main className="relative min-h-0 overflow-hidden rounded-[var(--radius-panel)] bg-canvas">
+      <CanvasStage />
+      {notice && (
+        <div
+          role="status"
+          className="absolute bottom-4 left-1/2 flex max-w-[90%] -translate-x-1/2 items-center gap-3 rounded-full bg-card px-4 py-2 text-sm shadow-lg"
+        >
+          {notice}
+          <button type="button" onClick={() => showNotice(null)} className="text-muted hover:text-fg">
+            Kapat
+          </button>
+        </div>
+      )}
     </main>
   );
 }

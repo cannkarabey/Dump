@@ -3,11 +3,14 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import { MousePointerClick, Smartphone, Sparkles } from "lucide-react";
 import { useUi, type RightTab } from "@/lib/store/ui";
+import { useDoc } from "@/lib/store/doc";
+import { presetLabel } from "@/lib/presets";
 import { cn } from "@/lib/cn";
 
 export function RightPanel() {
   const tab = useUi((s) => s.rightTab);
   const setTab = useUi((s) => s.setRightTab);
+  const format = useDoc((s) => s.doc.format);
 
   return (
     <Tabs.Root
@@ -29,8 +32,11 @@ export function RightPanel() {
           <div className="flex items-center gap-3 rounded-xl bg-card p-3">
             <Smartphone size={18} className="text-muted" />
             <div>
-              <p className="text-sm font-medium">Instagram Post</p>
-              <p className="text-xs text-muted">1080 × 1440 px</p>
+              <p className="text-sm font-medium">{presetLabel(format.w, format.h)}</p>
+              <p className="text-xs text-muted tabular-nums">
+                {format.w} × {format.h} px
+                {format.mode === "carousel" && ` · ${format.pages} sayfa`}
+              </p>
             </div>
           </div>
         </section>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { Cloud, Download, Minus, Plus, Redo2, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -8,6 +7,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { useUi } from "@/lib/store/ui";
 import { useTier } from "@/lib/store/tier";
+import { useDoc, useDocHistory } from "@/lib/store/doc";
 import { TIER_LABELS } from "@/lib/tiers";
 import type { Tier } from "@/lib/types";
 import { cn } from "@/lib/cn";
@@ -19,8 +19,11 @@ export function TopBar() {
   const zoom = useUi((s) => s.zoom);
   const setZoom = useUi((s) => s.setZoom);
   const tier = useTier((s) => s.tier);
-  // Moves into the doc store in S1.4.
-  const [title, setTitle] = useState("Adsız dump");
+  const title = useDoc((s) => s.doc.title);
+  const setTitle = useDoc((s) => s.setTitle);
+  const canUndo = useDocHistory((s) => s.pastStates.length > 0);
+  const canRedo = useDocHistory((s) => s.futureStates.length > 0);
+  const { undo, redo } = useDoc.temporal.getState();
 
   return (
     <header className="col-span-4 flex items-center gap-3 px-2">
@@ -30,8 +33,11 @@ export function TopBar() {
       </Link>
 
       <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        // Uncontrolled + commit on blur, so typing doesn't create one undo step per keystroke.
+        key={title}
+        defaultValue={title}
+        onBlur={(e) => setTitle(e.target.value.trim() || "Adsız dump")}
+        onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
         aria-label="Dump adı"
         className="h-8 w-44 rounded-lg bg-transparent px-2 text-sm font-medium outline-none hover:bg-hover focus:bg-hover"
       />
@@ -43,12 +49,12 @@ export function TopBar() {
 
       <div className="mx-auto flex items-center gap-1">
         <Tooltip content="Geri al (⌘Z)">
-          <IconButton label="Geri al" disabled>
+          <IconButton label="Geri al" disabled={!canUndo} onClick={() => undo()}>
             <Undo2 size={17} />
           </IconButton>
         </Tooltip>
         <Tooltip content="Yinele (⇧⌘Z)">
-          <IconButton label="Yinele" disabled>
+          <IconButton label="Yinele" disabled={!canRedo} onClick={() => redo()}>
             <Redo2 size={17} />
           </IconButton>
         </Tooltip>
@@ -58,7 +64,15 @@ export function TopBar() {
         <IconButton label="Uzaklaştır" onClick={() => setZoom(zoom / ZOOM_STEP)}>
           <Minus size={17} />
         </IconButton>
-        <span className="w-12 text-center text-sm tabular-nums">{Math.round(zoom * 100)}%</span>
+        <Tooltip content="Ekrana sığdır">
+          <button
+            type="button"
+            onClick={() => useUi.getState().requestFit()}
+            className="h-8 w-14 rounded-lg text-center text-sm tabular-nums hover:bg-hover"
+          >
+            {Math.round(zoom * 100)}%
+          </button>
+        </Tooltip>
         <IconButton label="Yakınlaştır" onClick={() => setZoom(zoom * ZOOM_STEP)}>
           <Plus size={17} />
         </IconButton>
