@@ -117,7 +117,7 @@ export function AccountView() {
             </a>
           ) : (
             tier === "free" && (
-              <Link href="/#fiyatlar" className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white">
+              <Link href="/#pricing" className="rounded-full bg-accent px-4 py-2 text-sm font-medium text-white">
                 Planları gör
               </Link>
             )

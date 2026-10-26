@@ -1,56 +1,64 @@
 "use client";
 
+import { format, type Dict } from "@/lib/i18n/dictionary";
+import { Bezel } from "@/components/ui/Bezel";
 import { cn } from "@/lib/cn";
 import { useScrollProgress } from "./useScrollProgress";
 import { DateStamp, PhotoTile, Polaroid } from "./visuals";
 
-const STEPS = [
-  { title: ["Tek canvas.", "Bütün carousel."], text: "Dump'ını tek parça tasarla; her slayt ayrı görsel olarak iner, kaydırınca kesintisiz akar." },
-  { title: ["Fotoğrafların.", "Senin tarzın."], text: "Polaroid, film şeridi, panorama… Şablon gibi durmayan şablonlarla fotoğrafların öne çıksın." },
-  { title: ["Ayın dump'ı.", "Tek tıkla."], text: "Çekim tarihine göre sıralar, ay kapağını ve renk paletini çıkarır, retro tarih damgası basar." },
-];
-
 /** 220vh section with a sticky stage; scroll progress drives the copy and the phone carousel. */
-export function StickyStory() {
+export function StickyStory({ t }: { t: Dict["story"] }) {
+  const STEPS = t.steps;
   const [ref, p] = useScrollProgress<HTMLElement>();
-  const step = Math.min(STEPS.length - 1, Math.floor(p * STEPS.length));
+  // The assistant section starts covering this one at p ≈ 0.58, so all steps show before that.
+  const step = p < 0.2 ? 0 : p < 0.4 ? 1 : 2;
   // One slide per step; the CSS transition animates the swipe so the phone never rests between slides.
   const slide = step;
+  // Line fill across the part of the scroll where steps change (0 → 0.5).
+  const fill = Math.min(1, p / 0.5);
 
   return (
-    <section ref={ref} className="relative h-[240vh]">
+    <section ref={ref} className="relative h-[340vh]">
       <div className="sticky top-0 flex h-[100svh] items-center overflow-hidden px-4">
         <div className="mx-auto grid w-full max-w-5xl items-center gap-10 md:grid-cols-2">
-          <div className="relative min-h-[220px]">
+          <div className="relative min-h-[260px] sm:min-h-[320px]">
             {STEPS.map((s, i) => (
               <div
                 key={i}
                 aria-hidden={i !== step}
                 className={cn(
-                  "absolute inset-0 transition-all duration-500",
+                  "absolute inset-0 transition-[transform,opacity] duration-500",
                   i === step ? "translate-y-0 opacity-100" : i < step ? "-translate-y-6 opacity-0" : "translate-y-6 opacity-0",
                 )}
               >
-                <h2 className="font-display text-[40px] leading-[1.02] font-semibold tracking-[-0.04em] sm:text-[52px]">
+                <h2 className="display-2">
                   {s.title[0]}
                   <br />
-                  <span className="text-accent">{s.title[1]}</span>
+                  <span className="accent-line">{s.title[1]}</span>
                 </h2>
-                <p className="mt-5 max-w-md text-lg text-fg/60">{s.text}</p>
+                <p className="mt-5 max-w-md text-lg text-muted">{s.text}</p>
               </div>
             ))}
-            <div className="absolute -bottom-10 left-0 flex gap-1.5">
-              {STEPS.map((_, i) => (
-                <span key={i} className={cn("h-1.5 rounded-full transition-all", i === step ? "w-6 bg-accent" : "w-1.5 bg-black/15")} />
-              ))}
+            {/* Timeline: the line fills with scroll, reached steps light up. */}
+            <div className="absolute -bottom-14 left-0 w-full max-w-xs" role="progressbar" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1} aria-label={format(t.progress, { n: step + 1, total: STEPS.length })}>
+              <div className="relative h-1 rounded-full bg-black/10">
+                <div className="absolute inset-0 origin-left rounded-full bg-accent" style={{ transform: `scaleX(${fill})` }} />
+              </div>
+              <ol className="mt-3 flex justify-between text-xs font-semibold tabular-nums">
+                {STEPS.map((_, i) => (
+                  <li key={i} className={cn("transition-colors duration-300", i <= step ? "text-accent-ink" : "text-muted")}>
+                    0{i + 1}
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
 
-          <Phone>
+          <Phone handle={t.handle}>
             <div className="flex h-full bg-[#f6efe4] transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)]" style={{ transform: `translateX(${-slide * 100}%)` }}>
               {/* Three slides of one continuous canvas; the background sits on the strip so a photo can straddle slides 2–3. */}
               <div className="relative h-full w-full shrink-0 p-[8%]">
-                <p className="font-serif text-2xl font-bold">EKİM &apos;26</p>
+                <p className="font-serif text-2xl font-bold">{t.month}</p>
                 <p className="font-hand text-lg text-accent">dump</p>
                 <PhotoTile i={3} className="mt-3 aspect-[4/4.4] rounded">
                   <DateStamp className="text-xs">&apos;26 10 18</DateStamp>
@@ -74,18 +82,20 @@ export function StickyStory() {
   );
 }
 
-function Phone({ children }: { children: React.ReactNode }) {
+function Phone({ children, handle }: { children: React.ReactNode; handle: string }) {
   return (
-    <div className="mx-auto w-[260px] rounded-[44px] bg-[#1d1d1f] p-2.5 shadow-[0_40px_80px_-30px_#0f172a80] sm:w-[300px]">
-      <div className="overflow-hidden rounded-[36px] bg-white">
-        <div className="flex items-center gap-2 px-4 py-3 text-xs">
-          <span className="size-7 rounded-full bg-gradient-to-br from-[#ffb199] to-[#8e6cff]" />
-          <span className="font-semibold">ekim.dump</span>
-          <span className="ml-auto text-muted">•••</span>
+    <Bezel className="mx-auto w-fit [--bezel-radius:54px]">
+      <div className="w-[260px] rounded-[44px] bg-[#1d1d1f] p-2.5 sm:w-[300px]">
+        <div className="overflow-hidden rounded-[36px] bg-white">
+          <div className="flex items-center gap-2 px-4 py-3 text-xs">
+            <span className="size-7 rounded-full bg-gradient-to-br from-[#ffb199] to-[#8e6cff]" />
+            <span className="font-semibold">{handle}</span>
+            <span className="ml-auto text-muted">•••</span>
+          </div>
+          <div className="relative aspect-[3/4] overflow-hidden">{children}</div>
+          <div aria-hidden className="flex gap-3 px-4 py-3 text-lg">♡ ◯ ➤</div>
         </div>
-        <div className="relative aspect-[3/4] overflow-hidden">{children}</div>
-        <div className="flex gap-3 px-4 py-3 text-lg">♡ ◯ ➤</div>
       </div>
-    </div>
+    </Bezel>
   );
 }

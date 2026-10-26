@@ -1,11 +1,12 @@
+import type { Dict } from "@/lib/i18n/dictionary";
 import { Download, Layers, LayoutTemplate, Sparkles, Sticker, Type, Upload } from "lucide-react";
 import { LogoMark } from "./Logo";
 import { DateStamp, Polaroid, PhotoTile } from "./visuals";
 
 /** Static, illustrative replica of the editor for the hero (no screenshot asset needed). */
-export function EditorMock() {
+export function EditorMock({ t }: { t: Dict["mock"] }) {
   return (
-    <div className="overflow-hidden rounded-[28px] border border-black/10 bg-[#101010] text-[#fafafa] shadow-[0_40px_80px_-30px_#0f172a66]">
+    <div className="overflow-hidden rounded-card border border-black/10 bg-[#101010] text-[#fafafa] shadow-[0_40px_80px_-30px_#0f172a66]">
       {/* browser chrome */}
       <div className="flex items-center gap-2 border-b border-white/5 px-4 py-2.5">
         <span className="size-2.5 rounded-full bg-[#ff5f57]" />
@@ -16,12 +17,12 @@ export function EditorMock() {
       {/* top bar */}
       <div className="flex items-center gap-3 px-4 py-2 text-[11px]">
         <LogoMark />
-        <span className="font-semibold">EKİM &apos;26 dump</span>
+        <span className="font-semibold">{t.title}</span>
         <span className="ml-auto hidden items-center gap-1 rounded-full bg-white/5 px-2.5 py-1 sm:flex">
-          <Sparkles size={11} className="text-accent" /> Ayın Dump&apos;ı
+          <Sparkles size={11} className="text-accent" /> {t.monthDump}
         </span>
         <span className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1">
-          <Download size={11} /> Dışa aktar
+          <Download size={11} /> {t.export}
         </span>
       </div>
       <div className="grid grid-cols-[44px_1fr] gap-2 p-2 pt-0 sm:grid-cols-[44px_120px_1fr_150px]">
@@ -33,7 +34,7 @@ export function EditorMock() {
         </div>
         {/* flyout */}
         <div className="hidden flex-col gap-2 rounded-xl bg-[#161618] p-2 sm:flex">
-          <span className="text-[10px] font-semibold">Şablonlar</span>
+          <span className="text-[10px] font-semibold">{t.templates}</span>
           <div className="grid grid-cols-2 gap-1.5">
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <PhotoTile key={i} i={i + 2} className="aspect-[3/4] rounded-md opacity-80" />
@@ -44,7 +45,7 @@ export function EditorMock() {
         <div className="grid place-items-center rounded-xl bg-[#0b0b0c] px-3 py-6">
           <div className="grid w-full max-w-[560px] grid-cols-3 bg-[#f6efe4] shadow-2xl">
             <div className="relative aspect-[3/4] border-r border-dashed border-accent/60 p-[6%]">
-              <p className="font-serif text-[clamp(10px,2.2vw,22px)] leading-none font-bold text-[#1d1d1f]">EKİM &apos;26</p>
+              <p className="font-serif text-[clamp(10px,2.2vw,22px)] leading-none font-bold text-[#1d1d1f]">{t.month}</p>
               <p className="font-hand text-[clamp(9px,1.6vw,16px)] text-accent">dump</p>
               <PhotoTile i={3} className="mt-[6%] aspect-[4/3.6] rounded-sm">
                 <DateStamp className="text-[clamp(6px,0.9vw,10px)]">&apos;26 10 18</DateStamp>
@@ -68,14 +69,14 @@ export function EditorMock() {
         {/* assistant */}
         <div className="hidden flex-col gap-2 rounded-xl bg-[#161618] p-2 text-[10px] sm:flex">
           <span className="flex items-center gap-1 font-semibold">
-            <Sparkles size={11} className="text-accent" /> Asistan
+            <Sparkles size={11} className="text-accent" /> {t.assistant}
           </span>
           <div className="rounded-lg bg-white/5 p-2 leading-snug text-white/80">
-            Kapak güçlü! 2. sayfadaki iki fotoğraf çok benzer, birini 3. sayfaya taşıyalım mı?
+            {t.advice}
           </div>
-          <span className="self-start rounded-full bg-accent px-2 py-0.5 text-[9px]">Uygula</span>
+          <span className="self-start rounded-full bg-accent px-2 py-0.5 text-[9px]">{t.apply}</span>
           <div className="mt-auto flex flex-col gap-1">
-            {[["Hook", 82], ["Akış", 64], ["Renk", 90]].map(([k, v]) => (
+            {[[t.scores[0], 82], [t.scores[1], 64], [t.scores[2], 90]].map(([k, v]) => (
               <div key={k as string}>
                 <div className="flex justify-between text-white/50">
                   <span>{k}</span>

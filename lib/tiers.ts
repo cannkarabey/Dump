@@ -66,17 +66,47 @@ export const TIER_PRICES: Record<Tier, { monthly: number; yearly: number }> = {
   studio: { monthly: 10, yearly: 84 },
 };
 
+const FEATURE_COPY = {
+  tr: {
+    photos: (n: number) => `Dump başına ${n} fotoğraf`,
+    unlimited: "Sınırsız fotoğraf",
+    pages: (n: number) => `${n} sayfaya kadar carousel`,
+    allTemplates: "Tüm şablonlar",
+    freeTemplates: "Ücretsiz şablonlar",
+    export: (n: number) => `Uzun kenar ${n}px export`,
+    watermark: "Küçük filigran",
+    noWatermark: "Filigransız",
+    zip: "ZIP ile toplu indirme",
+    stamp: "Retro tarih damgası",
+    brandKit: "Marka kiti & özel fontlar",
+  },
+  en: {
+    photos: (n: number) => `${n} photos per dump`,
+    unlimited: "Unlimited photos",
+    pages: (n: number) => `Carousels up to ${n} pages`,
+    allTemplates: "All templates",
+    freeTemplates: "Free templates",
+    export: (n: number) => `${n}px long-side export`,
+    watermark: "Small watermark",
+    noWatermark: "No watermark",
+    zip: "ZIP batch download",
+    stamp: "Retro date stamps",
+    brandKit: "Brand kit & custom fonts",
+  },
+};
+
 /** Human-readable feature list per tier; shared by the paywall and the pricing section. */
-export function tierFeatures(tier: Tier): string[] {
+export function tierFeatures(tier: Tier, lang: "tr" | "en" = "tr"): string[] {
   const l = TIER_LIMITS[tier];
+  const c = FEATURE_COPY[lang];
   return [
-    Number.isFinite(l.maxPhotos) ? `Dump başına ${l.maxPhotos} fotoğraf` : "Sınırsız fotoğraf",
-    `${l.maxPages} sayfaya kadar carousel`,
-    l.templates === "all" ? "Tüm şablonlar" : "Ücretsiz şablonlar",
-    `Uzun kenar ${l.exportLongSide}px export`,
-    l.watermark ? "Küçük filigran" : "Filigransız",
-    ...(l.zip ? ["ZIP ile toplu indirme"] : []),
-    ...(l.stamp ? ["Retro tarih damgası"] : []),
-    ...(l.brandKit ? ["Marka kiti & özel fontlar"] : []),
+    Number.isFinite(l.maxPhotos) ? c.photos(l.maxPhotos) : c.unlimited,
+    c.pages(l.maxPages),
+    l.templates === "all" ? c.allTemplates : c.freeTemplates,
+    c.export(l.exportLongSide),
+    l.watermark ? c.watermark : c.noWatermark,
+    ...(l.zip ? [c.zip] : []),
+    ...(l.stamp ? [c.stamp] : []),
+    ...(l.brandKit ? [c.brandKit] : []),
   ];
 }

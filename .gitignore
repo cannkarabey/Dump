@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Template of required variables (no secrets).
 !.env.example
+
+# verification builds (see next.config.ts)
+/.next-build/

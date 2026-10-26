@@ -24,11 +24,11 @@ export function Modal({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
+        <Dialog.Overlay className="modal-overlay fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
         <Dialog.Content
           className={cn(
             // Portal escapes .theme-dark, so the modal re-applies the app theme itself.
-            "theme-dark fixed top-1/2 left-1/2 z-50 w-[min(92vw,880px)] -translate-x-1/2 -translate-y-1/2",
+            "modal-content theme-dark fixed top-1/2 left-1/2 z-50 w-[min(92vw,880px)] -translate-x-1/2 -translate-y-1/2",
             "max-h-[90dvh] overflow-y-auto rounded-[28px] border border-border bg-card p-6 text-fg",
             "shadow-[0_32px_80px_-24px_#00000059] focus:outline-none",
             className,

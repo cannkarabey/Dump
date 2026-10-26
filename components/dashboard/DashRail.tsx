@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
 const ITEMS = [
   { href: "/app", label: "Dump'larım", icon: FolderOpen },
   { href: "/app/templates", label: "Şablonlar", icon: LayoutTemplate },
-  { href: "/#fiyatlar", label: "Plan", icon: Crown },
+  { href: "/#pricing", label: "Plan", icon: Crown },
   { href: "/app/account", label: "Hesap", icon: CircleUser },
 ];
 

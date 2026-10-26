@@ -6,7 +6,7 @@ type Size = "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
   primary: "bg-fg text-bg hover:opacity-90",
-  accent: "bg-accent text-white hover:bg-accent-strong shadow-[0_8px_24px_-8px_var(--color-accent)]",
+  accent: "bg-accent text-white hover:bg-accent-strong shadow-accent",
   secondary: "bg-hover text-fg border border-border hover:border-border-strong",
   ghost: "text-fg hover:bg-hover",
 };
@@ -31,7 +31,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       type={type}
       className={cn(
-        "inline-flex items-center justify-center rounded-full font-medium whitespace-nowrap transition",
+        // Tactile: grows a touch on hover, presses in on click (transform only, 150ms).
+        "inline-flex items-center justify-center rounded-full font-medium whitespace-nowrap",
+        "transition-[transform,background-color,color,box-shadow,opacity] duration-150 hover:scale-[1.03] active:scale-[0.98]",
         "disabled:pointer-events-none disabled:opacity-40",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
         variants[variant],
