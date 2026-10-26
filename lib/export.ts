@@ -97,6 +97,17 @@ export async function exportPages(stage: Konva.Stage, doc: DumpDoc, opts: Export
   return blobs;
 }
 
+/**
+ * Every page as a small JPEG data URL for the AI assistant. A long side of 384px keeps each
+ * image at Gemini's minimum cost of 258 tokens (PLAN.md 3.3).
+ */
+export function renderPageThumbs(stage: Konva.Stage, doc: DumpDoc, longSide = 384): string[] {
+  const pixelRatio = longSide / Math.max(doc.format.w, doc.format.h);
+  return Array.from({ length: doc.format.pages }, (_, page) =>
+    renderPageCanvas(stage, doc, page, { pixelRatio, mime: "image/jpeg", watermark: false }).toDataURL("image/jpeg", 0.7),
+  );
+}
+
 /** Small JPEG data URL of the first page, for the dashboard. */
 export function renderThumbnail(stage: Konva.Stage, doc: DumpDoc, longSide = 360): string {
   const pixelRatio = longSide / Math.max(doc.format.w, doc.format.h);

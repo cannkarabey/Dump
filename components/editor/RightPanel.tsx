@@ -6,6 +6,7 @@ import { useUi, type RightTab } from "@/lib/store/ui";
 import { cn } from "@/lib/cn";
 import { DocProperties } from "./properties/DocProperties";
 import { ElementProperties } from "./properties/ElementProperties";
+import { AgentPanel } from "@/components/agent/AgentPanel";
 
 export function RightPanel() {
   const tab = useUi((s) => s.rightTab);
@@ -44,16 +45,8 @@ export function RightPanel() {
         )}
       </Tabs.Content>
 
-      <Tabs.Content value="assistant" className="flex min-h-0 flex-1 flex-col px-4 pb-4">
-        <div className="mt-auto mb-auto flex flex-col items-center gap-2 text-center">
-          <span className="grid size-12 place-items-center rounded-2xl bg-accent-soft text-accent">
-            <Sparkles size={20} />
-          </span>
-          <p className="text-sm font-semibold">AI Asistan</p>
-          <p className="max-w-60 text-xs text-muted">
-            Dump&apos;ını yorumlayacak, sıralama ve caption önerecek. Sprint 2&apos;de geliyor.
-          </p>
-        </div>
+      <Tabs.Content value="assistant" className="flex min-h-0 flex-1 flex-col px-3 pb-3">
+        <AgentPanel />
       </Tabs.Content>
     </Tabs.Root>
   );

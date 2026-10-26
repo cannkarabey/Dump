@@ -234,7 +234,7 @@ En kötü senaryo hesabı. Varsayımlar: kullanıcı kotasının tamamını kull
    ▼
 [Sunucu — app/api/agent/route.ts]
    ├─ oturum + kota kontrolü (Supabase / Upstash)
-   ├─ createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY })
+   ├─ createGoogle({ apiKey: process.env.GEMINI_API_KEY })
    ├─ streamText({ model: google('gemini-3.1-flash-lite' | 'gemini-3.8-flash'),
    │               system: SYSTEM_TR, messages, tools })   ← araçların execute'u YOK
    └─ stream yanıtı tarayıcıya döner
@@ -248,10 +248,10 @@ En kötü senaryo hesabı. Varsayımlar: kullanıcı kotasının tamamını kull
 ```
 - **Araçlar tarayıcıda çalışır:** Sunucuda tanımlanır ama `execute` fonksiyonu verilmez. Böylece çağrı tarayıcıya iletilir ve editör uygular. Fotoğraflar sunucuda saklanmaz.
 - **Araç seti (ilk sürüm):** `reorder_photos(order[])`, `apply_template(templateId)`, `set_background(color)`, `add_text(pageIndex, text, style)`, `remove_photo(photoId)`, `set_cover(photoId)`, `suggest_caption(captions[], hashtags[])`. Parametreler Zod şemasıyla tanımlanır ve uygulanmadan önce tarayıcıda tekrar doğrulanır.
-- **Vibe skoru:** Ayrı bir istek olarak, JSON şemalı çıktı (`generateObject` / Gemini `responseSchema`) ile `{hook, flow, color, variety, summary}` döner.
+- **Vibe skoru:** Ayrı bir istek olarak, JSON şemalı çıktı (`generateText` + `Output.object()`) ile `{hook, flow, color, variety, summary}` döner.
 - **Görsel gönderimi:** Sayfalar en uzun kenar 384px, JPEG kalite ≈0.7 ile render edilir (her biri ≈ 20–40 KB). İstek sınırı (20 MB) çok uzakta.
 - **Sistem talimatı (özet):** "Sen Türk sosyal medya kullanıcılarına yardım eden bir photo dump küratörüsün. Kısa, samimi, somut konuş. Önerilerini mümkünse araç çağrısıyla yap. Kullanıcı onaylamadan hiçbir şeyi değiştirdiğini söyleme."
-- **Doğrulanacak:** AI SDK ve Google'ın SDK'sındaki fonksiyon adları sürümler arasında değişebiliyor (ör. tarayıcı tarafı araç çıktısını ekleyen fonksiyon). Geliştirmeye başlarken kurulu sürümün dokümanına bakılacak.
+- **Uygulandı (26.10.2026, `ai@7`):** `createGoogle`, `streamText` → `createUIMessageStreamResponse({ stream: toUIMessageStream(...) })`, `await convertToModelMessages`, istemcide `addToolOutput`. Model kimlikleri `AI_MODEL_CHAT` / `AI_MODEL_DEEP` ile değiştirilebilir; SDK'nın listesinde Flash-Lite `gemini-3.1-flash-lite-preview` olarak geçiyor, ilk testte doğru kimlik doğrulanacak.
 
 ### 3.7 Gizlilik & KVKK
 - "Fotoğrafların sunucuya yüklenmez" mesajı editör için doğru, asistan için değil. Asistan ilk açıldığında tek satırlık onay iste: *"Asistan, yorum yapmak için slaytlarının küçük önizlemelerini Google Gemini'ye gönderir. Önizlemeler bizim sunucumuzda saklanmaz."*
@@ -731,8 +731,8 @@ export interface Asset {
 - `app/api/agent/route.ts`:
   ```ts
   import { streamText, convertToModelMessages } from 'ai';
-  import { createGoogleGenerativeAI } from '@ai-sdk/google';
-  const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
+  import { createGoogle } from '@ai-sdk/google';
+  const google = createGoogle({ apiKey: process.env.GEMINI_API_KEY });
   export const maxDuration = 30;
   export async function POST(req: Request) {
     const { messages, deep } = await req.json();
@@ -744,10 +744,10 @@ export interface Asset {
       messages: convertToModelMessages(messages),
       tools: agentTools,
     });
-    return result.toUIMessageStreamResponse();
+    return createUIMessageStreamResponse({ stream: toUIMessageStream({ stream: result.stream }) });
   }
   ```
-  *AI SDK fonksiyon adları (`convertToModelMessages`, `toUIMessageStreamResponse`, `inputSchema`) kurulu sürümün dokümanıyla doğrulanacak.*
+  *`ai@7` API'si kurulu paketin dokümanıyla doğrulandı (S2.7 uygulandı).*
 - **Bitti:** `curl` ile basit bir mesaj gönderildiğinde stream dönüyor.
 
 **S2.8 · Bağlam hazırlama (2:15–2:30)**
@@ -770,7 +770,7 @@ export interface Asset {
   - `status === 'streaming'` → iskelet animasyonu; `error` 429 ise "Bugünkü hakkın doldu" + Plan butonu.
   - İlk açılışta KVKK onay kartı (bölüm 3.7); onay `localStorage` + (Sprint 2 sonunda) profil.
 - `lib/agent/applyToolCall.ts`: her araç için Zod ile **tekrar doğrula** → bilinmeyen `assetId`/`templateId` varsa uygulama, kullanıcıya "Bu öneri geçersiz" göster.
-- `VibeScore`: `app/api/agent/score/route.ts` → `generateObject` (ya da sürüme göre `generateText` + `output` şeması) ile `{ hook, flow, color, variety: 1–10, summary }`; panelin üstünde 4 bar.
+- `VibeScore`: `app/api/agent/score/route.ts` → `generateText` + `Output.object()` ile `{ hook, flow, color, variety: 1–10, summary }`; panelin üstünde 4 bar.
 
 **S2.10 · Kota (2:50–3:00)**
 - `lib/agent/quota.ts`: `@upstash/ratelimit` ile iki limiter — `chat` ve `deep`; anahtar = kullanıcı id (girişliyse) yoksa imzalı anonim cookie + IP.
