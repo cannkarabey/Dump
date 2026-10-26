@@ -14,6 +14,7 @@ import { monthLabel } from "@/lib/month";
 import { TIER_LIMITS } from "@/lib/tiers";
 import { useEditorHotkeys } from "@/hooks/useEditorHotkeys";
 import { useAutosave } from "@/hooks/useAutosave";
+import { useAccountSync } from "@/hooks/useAccountSync";
 import { TopBar } from "./TopBar";
 import { LeftRail } from "./LeftRail";
 import { FlyoutPanel } from "./FlyoutPanel";
@@ -50,11 +51,7 @@ export function EditorRoot({ params }: { params: Promise<{ id: string }> }) {
   const [loading, setLoading] = useState(() => id !== "new" && useDoc.getState().doc.id !== id);
   useEditorHotkeys();
   useAutosave(id);
-
-  // Tier lives in localStorage; rehydrate after mount to avoid a hydration mismatch.
-  useEffect(() => {
-    void useTier.persist.rehydrate();
-  }, []);
+  useAccountSync();
 
   // Resolve what to show: the doc already in memory, a saved dump, a template start, or the format picker.
   useEffect(() => {

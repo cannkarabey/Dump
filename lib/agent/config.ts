@@ -15,7 +15,7 @@ export function geminiApiKey(): string | undefined {
 }
 
 /** Error payload the panel understands; keeps provider details out of the client. */
-export type AgentErrorCode = "not_configured" | "quota" | "bad_request" | "upstream";
+export type AgentErrorCode = "not_configured" | "auth_required" | "quota" | "bad_request" | "upstream";
 
 export function agentError(code: AgentErrorCode, status: number, extra: Record<string, unknown> = {}) {
   return Response.json({ error: code, ...extra }, { status });

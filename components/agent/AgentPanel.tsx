@@ -10,6 +10,7 @@ import { applyToolCall } from "@/lib/agent/applyToolCall";
 import { buildUserParts, createAgentTransport, errorMessage, quotaListeners } from "@/lib/agent/client";
 import type { AgentToolName, AgentUIMessage } from "@/lib/agent/tools";
 import { cn } from "@/lib/cn";
+import { signInWithGoogle } from "@/lib/supabase/client";
 import { SuggestionCard } from "./SuggestionCard";
 import { VibeScoreCard } from "./VibeScoreCard";
 
@@ -152,6 +153,11 @@ function Chat() {
         {error && (
           <div className="rounded-2xl border border-[#ff453a]/30 bg-[#ff453a]/10 p-3 text-xs leading-snug">
             {errorMessage(error)}
+            {(error as { code?: string }).code === "auth_required" && (
+              <button type="button" onClick={() => void signInWithGoogle(window.location.pathname)} className="ml-1 font-medium text-accent underline">
+                Google ile giriş yap
+              </button>
+            )}
             {(error as { code?: string }).code === "quota" && (
               <button type="button" onClick={() => useUi.getState().openPaywall()} className="ml-1 font-medium text-accent underline">
                 Planlar

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { useUi } from "@/lib/store/ui";
-import { useTier } from "@/lib/store/tier";
+import { useMockTiers, useTier } from "@/lib/store/tier";
 import { useDoc, useDocHistory } from "@/lib/store/doc";
 import { TIER_LABELS } from "@/lib/tiers";
 import type { Tier } from "@/lib/types";
@@ -22,6 +22,7 @@ export function TopBar() {
   const zoom = useUi((s) => s.zoom);
   const setZoom = useUi((s) => s.setZoom);
   const tier = useTier((s) => s.tier);
+  const mockTiers = useMockTiers();
   const title = useDoc((s) => s.doc.title);
   const setTitle = useDoc((s) => s.setTitle);
   const canUndo = useDocHistory((s) => s.pastStates.length > 0);
@@ -84,7 +85,7 @@ export function TopBar() {
         </Button>
       </Tooltip>
       {DEV && <DevTemplateExport />}
-      {DEV && <DevTierToggle />}
+      {mockTiers && <DevTierToggle />}
       <span
         className={cn(
           "rounded-full px-2.5 py-1 text-xs font-semibold",

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Crown, FolderOpen, LayoutTemplate, Plus } from "lucide-react";
+import { CircleUser, Crown, FolderOpen, LayoutTemplate, Plus } from "lucide-react";
 import { LogoMark } from "@/components/marketing/Logo";
 import { cn } from "@/lib/cn";
 
@@ -10,6 +10,7 @@ const ITEMS = [
   { href: "/app", label: "Dump'larım", icon: FolderOpen },
   { href: "/app/templates", label: "Şablonlar", icon: LayoutTemplate },
   { href: "/#fiyatlar", label: "Plan", icon: Crown },
+  { href: "/app/account", label: "Hesap", icon: CircleUser },
 ];
 
 export function DashRail() {

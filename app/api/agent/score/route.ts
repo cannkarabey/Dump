@@ -24,7 +24,9 @@ export async function POST(req: Request) {
   const images = (body.images ?? []).filter((u) => typeof u === "string" && u.startsWith("data:image/")).slice(0, MAX_IMAGES);
   if (!body.summary || !images.length) return agentError("bad_request", 400);
 
-  const { id, tier } = await requestIdentity();
+  const who = await requestIdentity();
+  if (!who.ok) return agentError("auth_required", 401);
+  const { id, tier } = who;
   const quota = await checkQuota(id, tier, "deep");
   if (!quota.ok) return agentError("quota", 429, { kind: "deep", reset: quota.reset });
 

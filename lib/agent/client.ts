@@ -86,6 +86,8 @@ export function errorMessage(error: unknown): string {
       return process.env.NODE_ENV === "development"
         ? "Asistan henüz bağlı değil: .env.local dosyasına GEMINI_API_KEY ekleyip geliştirme sunucusunu yeniden başlat."
         : "Asistan şu an kullanılamıyor. Biraz sonra tekrar dene.";
+    case "auth_required":
+      return "Asistanı kullanmak için ücretsiz giriş yap.";
     case "quota": {
       const info = (error as AgentRequestError).info;
       const when = info.reset ? new Date(info.reset).toLocaleString("tr-TR", { weekday: "long", hour: "2-digit", minute: "2-digit" }) : null;

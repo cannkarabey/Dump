@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { Check } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Crown } from "@/components/ui/Crown";
 import { useUi } from "@/lib/store/ui";
-import { useTier } from "@/lib/store/tier";
+import { useMockTiers, useTier } from "@/lib/store/tier";
+import { Segmented } from "@/components/ui/Segmented";
+import { checkoutUrl, type Period } from "@/lib/billing";
+import { signInWithGoogle } from "@/lib/supabase/client";
 import { TIER_LABELS, TIER_PRICES, tierFeatures, type Feature } from "@/lib/tiers";
 import type { Tier } from "@/lib/types";
 import { cn } from "@/lib/cn";
@@ -25,23 +29,62 @@ const REASONS: Record<PaywallReason, string> = {
 export function PaywallModal() {
   const { open, feature } = useUi((s) => s.modals.paywall);
   const current = useTier((s) => s.tier);
+  const account = useTier((s) => s.account);
+  const mock = useMockTiers();
+  const [period, setPeriod] = useState<Period>("monthly");
+  const close = () => useUi.getState().closePaywall();
 
-  // Sprint 1: buttons switch the mock tier. Sprint 2 (S2.12) replaces this with checkout.
+  const canCheckout = Boolean(account?.billingEnabled);
+  const needsSignIn = canCheckout && account?.authEnabled && !account.user;
+
   const choose = (tier: Tier) => {
-    useTier.getState().setTier(tier);
-    useUi.getState().closePaywall();
+    if (mock) {
+      // Local development without accounts: switch the mock tier instantly.
+      useTier.getState().setTier(tier);
+      close();
+      return;
+    }
+    if (tier === "free") return;
+    if (needsSignIn) {
+      void signInWithGoogle(window.location.pathname);
+      return;
+    }
+    const url = account?.user ? checkoutUrl(tier, period, account.user) : null;
+    // Full-page navigation to the hosted checkout; account sync picks up the new plan on return.
+    if (url) window.location.assign(url);
+  };
+
+  const label = (tier: Tier) => {
+    if (tier === current) return "Mevcut plan";
+    if (tier === "free") return mock ? "Free'ye geç" : "Portal'dan değiştir";
+    if (!mock && !canCheckout) return "Yakında";
+    if (needsSignIn) return "Giriş yap ve devam et";
+    return `${TIER_LABELS[tier]}'a geç`;
   };
 
   return (
     <Modal
       open={open}
-      onOpenChange={(o) => !o && useUi.getState().closePaywall()}
+      onOpenChange={(o) => !o && close()}
       title={feature ? `${REASONS[feature]} için planını yükselt` : "Planlar"}
       description="Ödeme anında kartının bankası tutarı TL'ye çevirir. İstediğin zaman iptal edebilirsin."
     >
+      <div className="mb-4 flex justify-center">
+        <Segmented
+          aria-label="Faturalandırma dönemi"
+          value={period}
+          onChange={setPeriod}
+          options={[
+            { value: "monthly", label: "Aylık" },
+            { value: "yearly", label: "Yıllık −30%" },
+          ]}
+        />
+      </div>
       <ul className="grid gap-3 sm:grid-cols-3">
         {(["free", "creator", "studio"] as Tier[]).map((tier) => {
           const highlight = tier === "creator";
+          const price = period === "yearly" ? TIER_PRICES[tier].yearly / 12 : TIER_PRICES[tier].monthly;
+          const disabled = tier === current || (!mock && (tier === "free" || !canCheckout));
           return (
             <li
               key={tier}
@@ -58,10 +101,13 @@ export function PaywallModal() {
                     <span className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[11px] text-white">Popüler</span>
                   )}
                 </p>
-                <p className="mt-2 text-3xl font-semibold tracking-tight">
-                  ${TIER_PRICES[tier].monthly}
+                <p className="mt-2 text-3xl font-semibold tracking-tight tabular-nums">
+                  ${Number.isInteger(price) ? price : price.toFixed(2)}
                   <span className="text-sm font-normal text-muted">/ay</span>
                 </p>
+                {period === "yearly" && tier !== "free" && (
+                  <p className="text-xs text-muted">yıllık ${TIER_PRICES[tier].yearly}</p>
+                )}
               </div>
               <ul className="flex flex-1 flex-col gap-2 text-sm">
                 {tierFeatures(tier).map((f) => (
@@ -71,18 +117,20 @@ export function PaywallModal() {
                   </li>
                 ))}
               </ul>
-              <Button
-                variant={highlight ? "accent" : "secondary"}
-                disabled={tier === current}
-                onClick={() => choose(tier)}
-              >
-                {tier === current ? "Mevcut plan" : tier === "free" ? "Free'ye geç" : `${TIER_LABELS[tier]}'a geç`}
+              <Button variant={highlight ? "accent" : "secondary"} disabled={disabled} onClick={() => choose(tier)}>
+                {label(tier)}
               </Button>
             </li>
           );
         })}
       </ul>
-      <p className="mt-4 text-center text-xs text-muted">Test sürümü: ödeme henüz bağlı değil, plan anında değişir.</p>
+      <p className="mt-4 text-center text-xs text-muted">
+        {mock
+          ? "Geliştirme modu: ödeme bağlı değil, plan anında değişir."
+          : canCheckout
+            ? "Ödeme Lemon Squeezy üzerinden güvenle alınır; fatura e-postana gelir."
+            : "Ücretli planlar çok yakında açılıyor."}
+      </p>
     </Modal>
   );
 }

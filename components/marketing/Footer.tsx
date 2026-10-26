@@ -18,6 +18,14 @@ const COLUMNS = [
       { href: "/#sss", label: "SSS" },
     ],
   },
+  {
+    title: "Yasal",
+    links: [
+      { href: "/gizlilik", label: "Gizlilik ve KVKK" },
+      { href: "/kosullar", label: "Kullanım koşulları" },
+      { href: "/iade", label: "İptal ve iade" },
+    ],
+  },
 ];
 
 export function Footer() {
@@ -30,7 +38,7 @@ export function Footer() {
             Aylık photo dump, Instagram carousel ve TikTok slideshow&apos;larını tarayıcında hazırla.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-10">
+        <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
           {COLUMNS.map((c) => (
             <div key={c.title}>
               <p className="text-sm font-semibold">{c.title}</p>

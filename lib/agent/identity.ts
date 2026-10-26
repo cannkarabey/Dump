@@ -1,21 +1,27 @@
 import { cookies } from "next/headers";
+import { getAccount } from "@/lib/account";
 import type { Tier } from "@/lib/types";
 
 const COOKIE = "dc_aid";
 
+export type Identity = { ok: true; id: string; tier: Tier } | { ok: false; reason: "auth_required" };
+
 /**
- * Who is asking, for quota purposes. Until sign-in lands (S2.11) this is an anonymous cookie id,
- * and everyone is treated as Free: the browser's tier can't be trusted.
+ * Who is asking, for quota purposes. With sign-in configured, the assistant requires an account
+ * (PLAN.md 3.4) and quotas follow the user's real plan. Without it (local development), an
+ * anonymous cookie id on the Free limits keeps the assistant usable.
  */
-export async function requestIdentity(): Promise<{ id: string; tier: Tier }> {
+export async function requestIdentity(): Promise<Identity> {
+  const account = await getAccount();
+  if (account.authEnabled) {
+    return account.user ? { ok: true, id: account.user.id, tier: account.tier } : { ok: false, reason: "auth_required" };
+  }
+
   const jar = await cookies();
   let anon = jar.get(COOKIE)?.value;
   if (!anon) {
     anon = crypto.randomUUID();
     jar.set(COOKIE, anon, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 60 * 60 * 24 * 365, path: "/" });
   }
-  // Keyed by the cookie alone: an IP is shared by many people on mobile networks and campus NATs.
-  // Clearing cookies does reset an anonymous allowance; PLAN.md 3.4 closes that by requiring
-  // sign-in for the assistant once auth lands (S2.11), when this becomes the user id.
-  return { id: anon, tier: "free" };
+  return { ok: true, id: anon, tier: "free" };
 }
