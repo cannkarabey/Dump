@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { Globe } from "lucide-react";
-import { alternatePath, ROUTES, type Locale } from "@/lib/i18n/config";
+import { alternatePath, rememberLocale, ROUTES, type Locale } from "@/lib/i18n/config";
 import { cn } from "@/lib/cn";
 
 /**
@@ -17,6 +18,7 @@ export function LangSwitch({ lang, label, className }: { lang: Locale; label: st
       lang={target}
       onClick={(e) => {
         e.preventDefault();
+        rememberLocale(target);
         window.location.assign(alternatePath(window.location.pathname, target) + window.location.hash);
       }}
       className={cn(
@@ -29,4 +31,10 @@ export function LangSwitch({ lang, label, className }: { lang: Locale; label: st
       <span className="sr-only">{label}</span>
     </a>
   );
+}
+
+/** First visit decides the app's language; an explicit switch (here or in the app) overrides it. */
+export function LangCookie({ lang }: { lang: Locale }) {
+  useEffect(() => rememberLocale(lang, false), [lang]);
+  return null;
 }

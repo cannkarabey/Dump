@@ -11,6 +11,30 @@ export function isLocale(value: string): value is Locale {
   return (LOCALES as readonly string[]).includes(value);
 }
 
+/**
+ * The app (/app/…) has no language in its URL: proxy.ts reads this cookie (falling back to
+ * Accept-Language) and rewrites onto app/app/[lang]. Set by the marketing site and the in-app switcher.
+ */
+export const LANG_COOKIE = "lang";
+
+export function detectLocale(cookie: string | undefined, acceptLanguage: string | null): Locale {
+  if (cookie && isLocale(cookie)) return cookie;
+  // First language tag wins; anything other than Turkish gets English.
+  const first = acceptLanguage?.split(",")[0]?.trim().toLowerCase() ?? "";
+  if (!first) return DEFAULT_LOCALE;
+  return first.startsWith("tr") ? "tr" : "en";
+}
+
+/** Persists the language for the app; `force` overrides an earlier choice. Client only. */
+export function rememberLocale(lang: Locale, force = true) {
+  try {
+    if (!force && new RegExp(`(?:^|; )${LANG_COOKIE}=`).test(document.cookie)) return;
+    document.cookie = `${LANG_COOKIE}=${lang}; path=/; max-age=31536000; samesite=lax`;
+  } catch {
+    // Cookies blocked: the app falls back to Accept-Language.
+  }
+}
+
 /** Public path of every marketing page per language. `internal` is the folder under [lang]. */
 export const ROUTES = {
   home: { internal: "", tr: "/", en: "/en" },

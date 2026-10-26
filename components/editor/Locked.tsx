@@ -5,6 +5,7 @@ import { useCan } from "@/lib/store/tier";
 import { useUi } from "@/lib/store/ui";
 import type { Feature } from "@/lib/tiers";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/app";
 
 /**
  * Gates a control behind a tier feature. When not allowed, the children are inert and
@@ -22,12 +23,13 @@ export function Locked({
   showCrown?: boolean;
 }) {
   const allowed = useCan(feature);
+  const { t } = useT();
   if (allowed) return <>{children}</>;
   return (
     <div
       role="button"
       tabIndex={0}
-      aria-label="Premium özellik — planları gör"
+      aria-label={t.common.premiumLocked}
       onClickCapture={(e) => {
         e.preventDefault();
         e.stopPropagation();

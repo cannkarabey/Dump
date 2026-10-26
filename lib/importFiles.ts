@@ -5,6 +5,7 @@ import { useUi } from "./store/ui";
 import { placeAssets } from "./placement";
 import { TIER_LIMITS } from "./tiers";
 import type { Asset } from "./types";
+import { at, format } from "./i18n/appDictionary";
 
 /** Puts already-imported assets onto the canvas as one undo step and selects the new images. */
 export function placeOnCanvas(assets: Asset[]) {
@@ -40,16 +41,17 @@ export async function importFiles(files: File[]) {
   const accepted = images.slice(0, Math.max(0, room));
   const overLimit = accepted.length < images.length;
   if (overLimit) ui.openPaywall("maxPhotos");
-  const limitNotice = overLimit ? `Planında en fazla ${maxPhotos} fotoğraf var; fazlası eklenmedi.` : null;
+  const t = at().notices;
+  const limitNotice = overLimit ? format(t.photoLimit, { n: maxPhotos }) : null;
   if (!accepted.length) {
     ui.showNotice(limitNotice);
     return;
   }
 
-  ui.showNotice(`${accepted.length} fotoğraf hazırlanıyor…`);
+  ui.showNotice(format(t.preparing, { n: accepted.length }));
   const { added, failed } = await useAssets.getState().addFiles(accepted);
   const failedNotice = failed.length
-    ? `Açılamayan dosyalar: ${failed.join(", ")}. HEIC dosyalarını JPEG olarak dışa aktarıp tekrar dene.`
+    ? format(t.failed, { files: failed.join(", ") })
     : null;
   ui.showNotice([limitNotice, failedNotice].filter(Boolean).join(" ") || null);
   if (added.length) placeOnCanvas(added);

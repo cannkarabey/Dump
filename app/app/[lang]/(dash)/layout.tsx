@@ -2,7 +2,7 @@ import { DashRail } from "@/components/dashboard/DashRail";
 import { AccountSync } from "@/components/dashboard/AccountSync";
 
 /** Dashboard shell (My dumps, Templates). The editor has its own full-screen layout. */
-export default function DashLayout({ children }: LayoutProps<"/app">) {
+export default function DashLayout({ children }: LayoutProps<"/app/[lang]">) {
   return (
     <div className="flex h-dvh">
       <AccountSync />

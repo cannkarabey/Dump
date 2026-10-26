@@ -5,6 +5,7 @@ import { useDoc } from "@/lib/store/doc";
 import { useUi } from "@/lib/store/ui";
 import { fontFamilyFor } from "@/lib/fonts";
 import type { TextEl } from "@/lib/types";
+import { at } from "@/lib/i18n/appDictionary";
 
 /**
  * Konva's recommended pattern for editing canvas text: overlay a textarea that matches the
@@ -42,7 +43,7 @@ export function InlineTextEditor({ el, zoom, pan }: { el: TextEl; zoom: number; 
     <textarea
       ref={ref}
       defaultValue={el.text}
-      aria-label="Metni düzenle"
+      aria-label={at().editor.editText}
       spellCheck={false}
       onInput={fitHeight}
       onBlur={finish}

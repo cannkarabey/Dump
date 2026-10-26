@@ -1,6 +1,7 @@
 import { createStore, del, delMany, get, getMany, keys, set, setMany } from "idb-keyval";
 import { assetFromStored } from "./image";
 import type { Asset, DumpDoc } from "./types";
+import { at } from "./i18n/appDictionary";
 
 /**
  * Local persistence in IndexedDB (S2.4). Layout:
@@ -99,7 +100,7 @@ export async function deleteDump(id: string) {
 export async function duplicateDump(id: string, newId: string): Promise<boolean> {
   const record = await get<DumpRecord>(dumpKey(id), store);
   if (!record) return false;
-  const doc = { ...record.doc, id: newId, title: `${record.doc.title} (kopya)`, updatedAt: Date.now() };
+  const doc = { ...record.doc, id: newId, title: `${record.doc.title}${at().dumps.copySuffix}`, updatedAt: Date.now() };
   await set(dumpKey(newId), { ...record, doc, savedAt: Date.now() }, store);
   return true;
 }

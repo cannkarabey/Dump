@@ -19,6 +19,7 @@ import {
   type ExportMime,
 } from "@/lib/export";
 import { cn } from "@/lib/cn";
+import { format, useT } from "@/lib/i18n/app";
 
 const QUALITIES = [
   { id: "hd", label: "HD", longSide: 1440 },
@@ -32,6 +33,7 @@ export function ExportDialog() {
   const doc = useDoc((s) => s.doc);
   const activePage = useUi((s) => s.activePage);
   const limits = useLimits();
+  const x = useT().t.exportDialog;
 
   const [mime, setMime] = useState<ExportMime>("image/png");
   const [quality, setQuality] = useState<(typeof QUALITIES)[number]["id"]>("hd");
@@ -65,10 +67,10 @@ export function ExportDialog() {
       if (zip) await downloadZip(blobs, names, doc.title);
       else await downloadEach(blobs, names);
       close();
-      useUi.getState().showNotice(`${blobs.length} görsel indirildi (${outW}×${outH}).`);
+      useUi.getState().showNotice(format(x.done, { n: blobs.length, w: outW, h: outH }));
     } catch (e) {
       console.error(e);
-      setError("Dışa aktarma başarısız oldu. Daha düşük kalite ya da tek sayfa ile tekrar dene.");
+      setError(x.failed);
     } finally {
       setProgress(null);
     }
@@ -78,14 +80,14 @@ export function ExportDialog() {
     <Modal
       open={open}
       onOpenChange={(o) => !o && !progress && close()}
-      title="Dışa aktar"
-      description="Her sayfa ayrı bir görsel olur; carousel'de sırayla paylaş."
+      title={x.title}
+      description={x.description}
       className="w-[min(92vw,480px)]"
     >
       <div className="flex flex-col gap-5">
-        <Field label="Format">
+        <Field label={x.format}>
           <Segmented
-            aria-label="Format"
+            aria-label={x.format}
             value={mime}
             onChange={setMime}
             options={[
@@ -95,7 +97,7 @@ export function ExportDialog() {
           />
         </Field>
 
-        <Field label="Kalite" hint={`${outW} × ${outH} px`}>
+        <Field label={x.quality} hint={`${outW} × ${outH} px`}>
           <div className="flex gap-1.5">
             {QUALITIES.map((opt) => {
               const locked = opt.longSide > limits.exportLongSide;
@@ -119,14 +121,14 @@ export function ExportDialog() {
         </Field>
 
         {doc.format.pages > 1 && (
-          <Field label="Sayfalar">
+          <Field label={x.pages}>
             <Segmented
-              aria-label="Sayfalar"
+              aria-label={x.pages}
               value={scope}
               onChange={setScope}
               options={[
-                { value: "all", label: `Tümü (${doc.format.pages})` },
-                { value: "current", label: `Sayfa ${activePage + 1}` },
+                { value: "all", label: format(x.all, { n: doc.format.pages }) },
+                { value: "current", label: format(x.page, { n: activePage + 1 }) },
               ]}
             />
           </Field>
@@ -136,36 +138,34 @@ export function ExportDialog() {
           {pages.length > 1 && (
             <li className="flex items-center gap-1.5">
               {limits.zip ? (
-                "Tek bir ZIP dosyası olarak inecek."
+                x.zipNote
               ) : (
                 <>
-                  Dosyalar tek tek inecek. ZIP için <Crown /> Creator.
+                  {x.eachNote} <Crown /> Creator.
                 </>
               )}
             </li>
           )}
           {limits.watermark && (
             <li>
-              Free planda köşede küçük bir filigran var.{" "}
+              {x.watermarkNote}{" "}
               <button type="button" className="text-accent underline" onClick={() => useUi.getState().openPaywall("hiRes")}>
-                Kaldır
+                {x.remove}
               </button>
             </li>
           )}
-          {mime === "image/jpeg" && doc.background === "transparent" && <li>JPG şeffaflığı desteklemez; arka plan beyaz olur.</li>}
+          {mime === "image/jpeg" && doc.background === "transparent" && <li>{x.jpgNote}</li>}
         </ul>
 
         {error && <p className="text-sm text-[#ff453a]">{error}</p>}
 
         <Button variant="accent" size="lg" onClick={run} disabled={Boolean(progress)}>
           {progress ? (
-            <>
-              Hazırlanıyor… {progress.done}/{progress.total}
-            </>
+            format(x.preparing, { done: progress.done, total: progress.total })
           ) : (
             <>
               <Download size={17} />
-              {zip ? "ZIP indir" : pages.length > 1 ? `${pages.length} görsel indir` : "İndir"}
+              {zip ? x.zip : pages.length > 1 ? format(x.many, { n: pages.length }) : x.one}
             </>
           )}
         </Button>

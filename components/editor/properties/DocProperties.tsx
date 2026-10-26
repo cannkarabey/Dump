@@ -10,6 +10,7 @@ import { useLimits } from "@/lib/store/tier";
 import { PRESETS, presetLabel } from "@/lib/presets";
 import { cn } from "@/lib/cn";
 import { Section } from "./fields";
+import { format as fill, useT } from "@/lib/i18n/app";
 
 const BACKGROUNDS = ["#ffffff", "#000000", "#f3ece2", "#efe9df", "#e5e7eb", "#ffd6e0", "#d7ecff", "transparent"];
 
@@ -21,22 +22,24 @@ export function DocProperties() {
   const { maxPages } = useLimits();
   const { addPage, duplicatePage, removePage, resize, setBackground } = useDoc.getState();
   const atLimit = format.pages >= maxPages;
+  const { t } = useT();
+  const d = t.doc;
 
   const guardPages = (fn: () => void) => () => (atLimit ? useUi.getState().openPaywall("maxPages") : fn());
 
   return (
     <div className="flex flex-col gap-3">
-      <Section title="Canvas">
+      <Section title={d.canvas}>
         <label className="flex items-center gap-3 rounded-xl bg-card p-3">
           <Smartphone size={18} className="shrink-0 text-muted" />
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-medium">{presetLabel(format.w, format.h)}</span>
+            <span className="block text-sm font-medium">{presetLabel(format.w, format.h, t)}</span>
             <span className="block text-xs text-muted tabular-nums">
               {format.w} × {format.h} px
             </span>
           </span>
           <select
-            aria-label="Yeniden boyutlandır"
+            aria-label={d.resize}
             value=""
             onChange={(e) => {
               const p = PRESETS.find((x) => x.id === e.target.value);
@@ -48,11 +51,11 @@ export function DocProperties() {
             className="h-8 w-28 rounded-lg border border-border bg-panel px-2 text-xs"
           >
             <option value="" disabled>
-              Boyutlandır…
+              {d.resizePlaceholder}
             </option>
             {PRESETS.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.label} ({p.w}×{p.h})
+                {t.presets.labels[p.id] ?? p.label} ({p.w}×{p.h})
               </option>
             ))}
           </select>
@@ -60,7 +63,7 @@ export function DocProperties() {
       </Section>
 
       <Section
-        title="Sayfalar"
+        title={d.pages}
         action={
           <span className="text-xs text-muted tabular-nums">
             {format.pages}/{maxPages}
@@ -82,13 +85,13 @@ export function DocProperties() {
                 className="flex flex-1 items-center gap-2 text-left text-sm"
               >
                 <span className="grid size-6 place-items-center rounded-full bg-card text-xs tabular-nums">{i + 1}</span>
-                Sayfa {i + 1}
+                {fill(d.page, { n: i + 1 })}
               </button>
-              <IconButton label={`Sayfa ${i + 1}'i çoğalt`} size="sm" onClick={guardPages(() => duplicatePage(i))}>
+              <IconButton label={fill(d.duplicatePage, { n: i + 1 })} size="sm" onClick={guardPages(() => duplicatePage(i))}>
                 <Copy size={14} />
               </IconButton>
               <IconButton
-                label={`Sayfa ${i + 1}'i sil`}
+                label={fill(d.deletePage, { n: i + 1 })}
                 size="sm"
                 disabled={format.pages === 1}
                 onClick={() => {
@@ -110,18 +113,18 @@ export function DocProperties() {
           })}
           className="mt-1 flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-muted hover:bg-card hover:text-fg"
         >
-          <Plus size={16} /> Sayfa ekle
+          <Plus size={16} /> {d.addPage}
           {atLimit && <Crown className="ml-auto" />}
         </button>
       </Section>
 
-      <Section title="Arka plan">
+      <Section title={d.background}>
         <div className="flex flex-wrap items-center gap-2">
           {BACKGROUNDS.map((c) => (
             <Swatch
               key={c}
               color={c}
-              label={c === "transparent" ? "Şeffaf" : c}
+              label={c === "transparent" ? d.transparent : c}
               selected={background === c}
               onClick={() => setBackground(c)}
             />
@@ -129,11 +132,11 @@ export function DocProperties() {
           <label
             className="relative size-8 cursor-pointer overflow-hidden rounded-full border border-border-strong"
             style={{ background: "conic-gradient(red, yellow, lime, aqua, blue, magenta, red)" }}
-            title="Özel renk"
+            title={d.customColor}
           >
             <input
               type="color"
-              aria-label="Özel arka plan rengi"
+              aria-label={d.customBackground}
               value={background === "transparent" ? "#ffffff" : background}
               onChange={(e) => setBackground(e.target.value)}
               className="absolute inset-0 cursor-pointer opacity-0"

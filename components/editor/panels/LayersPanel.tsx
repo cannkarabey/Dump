@@ -6,6 +6,8 @@ import { useAssets } from "@/lib/store/assets";
 import { useUi } from "@/lib/store/ui";
 import type { El } from "@/lib/types";
 import { cn } from "@/lib/cn";
+import { format as fill, useT } from "@/lib/i18n/app";
+import type { AppDict } from "@/lib/i18n/appDictionary";
 
 const ICONS: Record<El["type"], LucideIcon> = {
   image: ImageIcon,
@@ -15,18 +17,18 @@ const ICONS: Record<El["type"], LucideIcon> = {
   shape: Square,
 };
 
-function label(el: El, fileName?: string) {
+function label(el: El, l: AppDict["layers"], fileName?: string) {
   switch (el.type) {
     case "text":
-      return el.text.split("\n")[0] || "Metin";
+      return el.text.split("\n")[0] || l.text;
     case "image":
-      return fileName ?? "Fotoğraf";
+      return fileName ?? l.photo;
     case "slot":
-      return el.assetId ? (fileName ?? "Kutu") : "Boş kutu";
+      return el.assetId ? (fileName ?? l.slot) : l.emptySlot;
     case "sticker":
-      return "Sticker";
+      return l.sticker;
     case "shape":
-      return "Şekil";
+      return l.shape;
   }
 }
 
@@ -36,9 +38,10 @@ export function LayersPanel() {
   const format = useDoc((s) => s.doc.format);
   const assets = useAssets((s) => s.assets);
   const selection = useUi((s) => s.selection);
+  const l = useT().t.layers;
 
   if (!elements.length) {
-    return <p className="rounded-2xl bg-hover p-4 text-sm text-muted">Henüz katman yok. Fotoğraf ya da şablon ekle.</p>;
+    return <p className="rounded-2xl bg-hover p-4 text-sm text-muted">{l.empty}</p>;
   }
 
   return (
@@ -71,8 +74,8 @@ export function LayersPanel() {
                   <Icon size={15} />
                 </span>
               )}
-              <span className="min-w-0 flex-1 truncate">{label(el, asset?.fileName)}</span>
-              <span className="text-[11px] text-muted tabular-nums">s{pageOf(el, format.w, format.pages) + 1}</span>
+              <span className="min-w-0 flex-1 truncate">{label(el, l, asset?.fileName)}</span>
+              <span className="text-[11px] text-muted tabular-nums">{fill(l.pageShort, { n: pageOf(el, format.w, format.pages) + 1 })}</span>
               {el.locked && <Lock size={13} className="text-muted" />}
             </button>
           </li>

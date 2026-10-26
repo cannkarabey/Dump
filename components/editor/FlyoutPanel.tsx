@@ -1,7 +1,7 @@
 "use client";
 
 import { useUi, type LeftPanel } from "@/lib/store/ui";
-import { RAIL_ITEMS } from "./LeftRail";
+import { useT } from "@/lib/i18n/app";
 import { UploadPanel } from "./panels/UploadPanel";
 import { TextPanel } from "./panels/TextPanel";
 import { StickersPanel } from "./panels/StickersPanel";
@@ -18,7 +18,7 @@ const PANELS: Record<LeftPanel, () => React.ReactNode> = {
 
 export function FlyoutPanel() {
   const active = useUi((s) => s.activePanel);
-  const label = RAIL_ITEMS.find((i) => i.id === active)?.label;
+  const label = useT().t.editor.panels[active];
 
   return (
     <aside className="flex min-h-0 flex-col rounded-[var(--radius-panel)] bg-panel">

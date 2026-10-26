@@ -6,6 +6,7 @@ import { useAssets } from "@/lib/store/assets";
 import { useLimits } from "@/lib/store/tier";
 import { importFiles, placeOnCanvas } from "@/lib/importFiles";
 import { cn } from "@/lib/cn";
+import { format, useT } from "@/lib/i18n/app";
 
 export const ASSET_DRAG_TYPE = "application/x-dump-asset";
 
@@ -15,6 +16,7 @@ export function UploadPanel() {
   const order = useAssets((s) => s.order);
   const assets = useAssets((s) => s.assets);
   const { maxPhotos } = useLimits();
+  const u = useT().t.upload;
 
   return (
     <div className="flex flex-col gap-4">
@@ -39,8 +41,8 @@ export function UploadPanel() {
         <span className="grid size-14 place-items-center rounded-full bg-border-strong">
           <Plus size={26} />
         </span>
-        <span className="text-base font-semibold">Fotoğraf ekle</span>
-        <span className="text-sm text-muted">Tıkla, sürükle bırak ya da yapıştır</span>
+        <span className="text-base font-semibold">{u.add}</span>
+        <span className="text-sm text-muted">{u.hint}</span>
       </button>
       <input
         ref={inputRef}
@@ -57,7 +59,7 @@ export function UploadPanel() {
       {order.length > 0 && (
         <>
           <p className="flex justify-between text-xs text-muted">
-            <span>Yüklenenler</span>
+            <span>{u.uploaded}</span>
             <span className="tabular-nums">
               {order.length}
               {Number.isFinite(maxPhotos) ? ` / ${maxPhotos}` : ""}
@@ -74,7 +76,7 @@ export function UploadPanel() {
                     e.dataTransfer.effectAllowed = "copy";
                   }}
                   onClick={() => placeOnCanvas([assets[id]])}
-                  title={`${assets[id].fileName} — canvas'a eklemek için tıkla veya sürükle`}
+                  title={format(u.thumbTitle, { name: assets[id].fileName })}
                   className="block aspect-square w-full overflow-hidden rounded-lg bg-hover"
                 >
                   {/* Object URLs aren't optimizable by next/image. */}

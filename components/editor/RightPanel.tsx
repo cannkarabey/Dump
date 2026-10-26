@@ -4,6 +4,7 @@ import * as Tabs from "@radix-ui/react-tabs";
 import { MousePointerClick, Sparkles } from "lucide-react";
 import { useUi, type RightTab } from "@/lib/store/ui";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/app";
 import { DocProperties } from "./properties/DocProperties";
 import { ElementProperties } from "./properties/ElementProperties";
 import { AgentPanel } from "@/components/agent/AgentPanel";
@@ -12,6 +13,7 @@ export function RightPanel() {
   const tab = useUi((s) => s.rightTab);
   const setTab = useUi((s) => s.setRightTab);
   const selection = useUi((s) => s.selection);
+  const { t } = useT();
 
   return (
     <Tabs.Root
@@ -19,11 +21,11 @@ export function RightPanel() {
       onValueChange={(v) => setTab(v as RightTab)}
       className="flex min-h-0 flex-col rounded-[var(--radius-panel)] bg-panel"
     >
-      <Tabs.List aria-label="Sağ panel" className="m-3 grid grid-cols-2 rounded-full bg-hover p-1 text-[13px]">
-        <TabTrigger value="properties">Özellikler</TabTrigger>
+      <Tabs.List aria-label={t.editor.rightPanel} className="m-3 grid grid-cols-2 rounded-full bg-hover p-1 text-[13px]">
+        <TabTrigger value="properties">{t.editor.properties}</TabTrigger>
         <TabTrigger value="assistant">
           <Sparkles size={14} className="text-accent" />
-          Asistan
+          {t.editor.assistant}
         </TabTrigger>
       </Tabs.List>
 
@@ -37,9 +39,7 @@ export function RightPanel() {
               <span className="grid size-10 place-items-center rounded-2xl bg-hover text-muted">
                 <MousePointerClick size={18} />
               </span>
-              <p className="max-w-56 text-xs text-muted">
-                Boyut, döndürme, opaklık ve çerçeve için canvas&apos;ta bir öğeye tıkla.
-              </p>
+              <p className="max-w-56 text-xs text-muted">{t.editor.selectHint}</p>
             </div>
           </>
         )}

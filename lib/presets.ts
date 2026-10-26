@@ -1,3 +1,5 @@
+import { at } from "./i18n/appDictionary";
+
 export type PresetGroup = "popular" | "instagram" | "tiktok" | "youtube" | "x";
 
 export interface SizePreset {
@@ -8,13 +10,8 @@ export interface SizePreset {
   h: number;
 }
 
-export const PRESET_GROUPS: { id: PresetGroup; label: string }[] = [
-  { id: "popular", label: "Popüler" },
-  { id: "instagram", label: "Instagram" },
-  { id: "tiktok", label: "TikTok" },
-  { id: "youtube", label: "YouTube" },
-  { id: "x", label: "X" },
-];
+/** Labels live in the app dictionary (presets.groups). */
+export const PRESET_GROUPS: PresetGroup[] = ["popular", "instagram", "tiktok", "youtube", "x"];
 
 export const PRESETS: SizePreset[] = [
   { id: "ig-post", label: "Instagram Post", groups: ["popular", "instagram"], w: 1080, h: 1440 },
@@ -34,6 +31,8 @@ export function aspectLabel(w: number, h: number): string {
   return `${w / g}:${h / g}`;
 }
 
-export function presetLabel(w: number, h: number): string {
-  return PRESETS.find((p) => p.w === w && p.h === h)?.label ?? "Özel boyut";
+/** Labels are Turkish/brand names; the dictionary translates the ones that need it. */
+export function presetLabel(w: number, h: number, t = at()): string {
+  const p = PRESETS.find((x) => x.w === w && x.h === h);
+  return p ? (t.presets.labels[p.id] ?? p.label) : t.presets.custom;
 }

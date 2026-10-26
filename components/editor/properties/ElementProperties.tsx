@@ -7,22 +7,16 @@ import { Tooltip } from "@/components/ui/Tooltip";
 import { useDoc, type ElPatch } from "@/lib/store/doc";
 import { useUi } from "@/lib/store/ui";
 import { FONT_OPTIONS } from "@/lib/fonts";
-import type { El, FontKey, Frame, ImageEl, SlotEl, TextEl } from "@/lib/types";
+import type { FontKey, Frame, ImageEl, SlotEl, TextEl } from "@/lib/types";
 import { Locked } from "../Locked";
 import { ChipGroup, NumberField, Section, SliderField } from "./fields";
-
-const ELEMENT_LABELS: Record<El["type"], string> = {
-  image: "Fotoğraf",
-  slot: "Şablon kutusu",
-  text: "Metin",
-  sticker: "Sticker",
-  shape: "Şekil",
-};
+import { format, useT } from "@/lib/i18n/app";
 
 /** Right panel when one or more elements are selected. */
 export function ElementProperties({ ids }: { ids: string[] }) {
   const elements = useDoc((s) => s.doc.elements);
   const selected = elements.filter((el) => ids.includes(el.id));
+  const x = useT().t.element;
   const doc = useDoc.getState();
   const ui = useUi.getState();
 
@@ -37,18 +31,18 @@ export function ElementProperties({ ids }: { ids: string[] }) {
 
   const actions = (
     <div className="flex gap-1">
-      <Tooltip content={allLocked ? "Kilidi aç" : "Kilitle"}>
-        <IconButton label={allLocked ? "Kilidi aç" : "Kilitle"} size="sm" onClick={toggleLock}>
+      <Tooltip content={allLocked ? x.unlock : x.lock}>
+        <IconButton label={allLocked ? x.unlock : x.lock} size="sm" onClick={toggleLock}>
           {allLocked ? <Lock size={15} /> : <LockOpen size={15} />}
         </IconButton>
       </Tooltip>
-      <Tooltip content="Çoğalt (⌘D)">
-        <IconButton label="Çoğalt" size="sm" onClick={() => ui.setSelection(doc.duplicate(ids))}>
+      <Tooltip content={x.duplicateHint}>
+        <IconButton label={x.duplicate} size="sm" onClick={() => ui.setSelection(doc.duplicate(ids))}>
           <Copy size={15} />
         </IconButton>
       </Tooltip>
-      <Tooltip content="Sil (Delete)">
-        <IconButton label="Sil" size="sm" onClick={remove}>
+      <Tooltip content={x.deleteHint}>
+        <IconButton label={x.delete} size="sm" onClick={remove}>
           <Trash2 size={15} />
         </IconButton>
       </Tooltip>
@@ -57,8 +51,8 @@ export function ElementProperties({ ids }: { ids: string[] }) {
 
   if (selected.length > 1) {
     return (
-      <Section title={`${selected.length} öğe seçili`} action={actions}>
-        <p className="text-xs text-muted">Shift ile tıklayarak seçime ekle/çıkar. Birlikte taşı, döndür ya da boyutlandır.</p>
+      <Section title={format(x.selected, { n: selected.length })} action={actions}>
+        <p className="text-xs text-muted">{x.multiHint}</p>
       </Section>
     );
   }
@@ -68,17 +62,17 @@ export function ElementProperties({ ids }: { ids: string[] }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <Section title={ELEMENT_LABELS[el.type]} action={actions}>
+      <Section title={x.types[el.type]} action={actions}>
         <div className="grid grid-cols-2 gap-2">
           <NumberField label="X" value={el.x} onCommit={(x) => patch({ x })} />
           <NumberField label="Y" value={el.y} onCommit={(y) => patch({ y })} />
-          <NumberField label="G" value={el.width} min={20} onCommit={(width) => patch({ width })} />
-          {el.type !== "text" && <NumberField label="Yk" value={el.height} min={20} onCommit={(height) => patch({ height })} />}
+          <NumberField label={x.w} value={el.width} min={20} onCommit={(width) => patch({ width })} />
+          {el.type !== "text" && <NumberField label={x.h} value={el.height} min={20} onCommit={(height) => patch({ height })} />}
           <NumberField label="↻" value={el.rotation} suffix="°" onCommit={(rotation) => patch({ rotation })} />
         </div>
         <div className="mt-3">
           <SliderField
-            label="Opaklık"
+            label={x.opacity}
             value={el.opacity * 100}
             min={0}
             max={100}
@@ -88,10 +82,10 @@ export function ElementProperties({ ids }: { ids: string[] }) {
         </div>
         <div className="mt-3 flex gap-2">
           <Button size="sm" variant="secondary" onClick={() => doc.bringForward(el.id)}>
-            <ArrowUp size={14} /> Öne
+            <ArrowUp size={14} /> {x.forward}
           </Button>
           <Button size="sm" variant="secondary" onClick={() => doc.sendBackward(el.id)}>
-            <ArrowDown size={14} /> Arkaya
+            <ArrowDown size={14} /> {x.backward}
           </Button>
         </div>
       </Section>
@@ -103,22 +97,23 @@ export function ElementProperties({ ids }: { ids: string[] }) {
 }
 
 function PhotoSection({ el, patch }: { el: ImageEl | SlotEl; patch: (p: ElPatch) => void }) {
+  const x = useT().t.element;
   return (
-    <Section title="Fotoğraf">
-      <p className="mb-1.5 text-xs text-muted">Çerçeve</p>
+    <Section title={x.photo}>
+      <p className="mb-1.5 text-xs text-muted">{x.frame}</p>
       <ChipGroup<Frame>
         value={el.frame ?? "none"}
         onChange={(frame) => patch({ frame })}
         options={[
-          { value: "none", label: "Yok" },
-          { value: "polaroid", label: "Polaroid" },
-          { value: "film", label: "Film" },
+          { value: "none", label: x.frames.none },
+          { value: "polaroid", label: x.frames.polaroid },
+          { value: "film", label: x.frames.film },
         ]}
       />
       {(!el.frame || el.frame === "none") && (
         <div className="mt-3">
           <SliderField
-            label="Köşe yuvarlaklığı"
+            label={x.radius}
             value={el.radius ?? 0}
             min={0}
             max={Math.round(Math.min(el.width, el.height) / 2)}
@@ -129,8 +124,8 @@ function PhotoSection({ el, patch }: { el: ImageEl | SlotEl; patch: (p: ElPatch)
       <Locked feature="stamp" className="mt-3">
         <label className="flex items-center justify-between gap-2 rounded-xl bg-card px-3 py-2 text-sm">
           <span>
-            Tarih damgası
-            <span className="block text-xs text-muted">Fotoğrafın çekim tarihi, retro kamera stilinde</span>
+            {x.stamp}
+            <span className="block text-xs text-muted">{x.stampHint}</span>
           </span>
           <input
             type="checkbox"
@@ -142,7 +137,7 @@ function PhotoSection({ el, patch }: { el: ImageEl | SlotEl; patch: (p: ElPatch)
       </Locked>
       {el.type === "slot" && el.assetId && (
         <Button size="sm" variant="ghost" className="mt-2" onClick={() => patch({ assetId: undefined })}>
-          Fotoğrafı kutudan çıkar
+          {x.removeFromSlot}
         </Button>
       )}
     </Section>
@@ -150,26 +145,28 @@ function PhotoSection({ el, patch }: { el: ImageEl | SlotEl; patch: (p: ElPatch)
 }
 
 function TextSection({ el, patch }: { el: TextEl; patch: (p: ElPatch) => void }) {
+  const { t } = useT();
+  const x = t.element;
   return (
-    <Section title="Metin">
+    <Section title={x.text}>
       <textarea
         key={el.text}
         defaultValue={el.text}
         rows={2}
         onBlur={(e) => e.target.value !== el.text && patch({ text: e.target.value })}
         className="w-full resize-none rounded-xl bg-card p-2.5 text-sm outline-none"
-        aria-label="Metin içeriği"
+        aria-label={x.textContent}
       />
       <div className="mt-2 grid grid-cols-2 gap-2">
         <select
-          aria-label="Font"
+          aria-label={x.font}
           value={el.fontFamily}
           onChange={(e) => patch({ fontFamily: e.target.value as FontKey })}
           className="h-9 rounded-xl bg-card px-2 text-sm"
         >
           {FONT_OPTIONS.map((f) => (
             <option key={f.key} value={f.key}>
-              {f.label}
+              {t.fonts[f.key] ?? f.label}
             </option>
           ))}
         </select>
@@ -178,7 +175,7 @@ function TextSection({ el, patch }: { el: TextEl; patch: (p: ElPatch) => void })
       <div className="mt-2 flex items-center gap-2">
         <input
           type="color"
-          aria-label="Metin rengi"
+          aria-label={x.textColor}
           value={el.fill}
           onChange={(e) => patch({ fill: e.target.value })}
           className="size-9 cursor-pointer rounded-xl bg-card p-1"
@@ -187,9 +184,9 @@ function TextSection({ el, patch }: { el: TextEl; patch: (p: ElPatch) => void })
           value={el.align}
           onChange={(align) => patch({ align })}
           options={[
-            { value: "left", label: "Sol" },
-            { value: "center", label: "Orta" },
-            { value: "right", label: "Sağ" },
+            { value: "left", label: x.align.left },
+            { value: "center", label: x.align.center },
+            { value: "right", label: x.align.right },
           ]}
         />
       </div>

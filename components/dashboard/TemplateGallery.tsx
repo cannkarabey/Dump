@@ -10,16 +10,24 @@ import { TemplatePreview } from "@/components/editor/TemplatePreview";
 import { photoCount, similarTemplates, templatePages, TEMPLATES } from "@/lib/templates";
 import type { Template } from "@/lib/templates/schema";
 import { cn } from "@/lib/cn";
+import { format, useLocalizeTemplate, useT } from "@/lib/i18n/app";
+import type { AppDict } from "@/lib/i18n/appDictionary";
 
 type Filter = "all" | "single" | "carousel" | "free" | "premium";
 
-const FILTERS: { id: Filter; label: string; test: (t: Template) => boolean }[] = [
-  { id: "all", label: "Tümü", test: () => true },
-  { id: "single", label: "Tek post", test: (t) => t.mode === "single" },
-  { id: "carousel", label: "Carousel", test: (t) => t.mode === "carousel" },
-  { id: "free", label: "Ücretsiz", test: (t) => t.tier === "free" },
-  { id: "premium", label: "Premium", test: (t) => t.tier === "creator" },
+const FILTERS: { id: Filter; test: (t: Template) => boolean }[] = [
+  { id: "all", test: () => true },
+  { id: "single", test: (t) => t.mode === "single" },
+  { id: "carousel", test: (t) => t.mode === "carousel" },
+  { id: "free", test: (t) => t.tier === "free" },
+  { id: "premium", test: (t) => t.tier === "creator" },
 ];
+
+function formatLine(t: Template, g: AppDict["gallery"], long = false) {
+  const pages = templatePages(t);
+  const kind = pages > 1 ? format(g.carouselPages, { n: pages }) : g.singlePost;
+  return `${kind} · ${format(long ? g.photosLong : g.photosShort, { n: photoCount(t) })}`;
+}
 
 /** Turkish-aware, accent-insensitive match ("şablon" finds "sablon"). */
 function normalize(s: string) {
@@ -31,6 +39,9 @@ function normalize(s: string) {
 }
 
 export function TemplateGallery() {
+  const { t: tr } = useT();
+  const localize = useLocalizeTemplate();
+  const templates = useMemo(() => TEMPLATES.map(localize), [localize]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [open, setOpen] = useState<Template | null>(null);
@@ -38,23 +49,26 @@ export function TemplateGallery() {
   const results = useMemo(() => {
     const q = normalize(query.trim());
     const test = FILTERS.find((f) => f.id === filter)!.test;
-    return TEMPLATES.filter((t) => test(t) && (!q || normalize([t.title, ...t.tags].join(" ")).includes(q)));
-  }, [query, filter]);
+    // Search both the localized and the original title, so "polaroid" and "Polaroid Dağınık" both match.
+    return templates.filter(
+      (t, i) => test(t) && (!q || normalize([t.title, TEMPLATES[i].title, ...t.tags].join(" ")).includes(q)),
+    );
+  }, [templates, query, filter]);
 
   return (
     <>
       <label className="mx-auto mt-8 flex h-14 max-w-2xl items-center gap-3 rounded-2xl bg-panel px-5 ring-1 ring-border focus-within:ring-accent">
         <Search size={18} className="text-muted" />
-        <span className="sr-only">Şablon ara</span>
+        <span className="sr-only">{tr.gallery.search}</span>
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Şablon ara: polaroid, film, panorama…"
+          placeholder={tr.gallery.searchPlaceholder}
           className="flex-1 bg-transparent text-base outline-none placeholder:text-muted"
         />
       </label>
 
-      <div className="mt-5 flex flex-wrap justify-center gap-2" role="radiogroup" aria-label="Filtre">
+      <div className="mt-5 flex flex-wrap justify-center gap-2" role="radiogroup" aria-label={tr.gallery.filter}>
         {FILTERS.map((f) => (
           <button
             key={f.id}
@@ -67,7 +81,7 @@ export function TemplateGallery() {
               filter === f.id ? "bg-fg text-bg" : "bg-panel text-muted hover:text-fg",
             )}
           >
-            {f.label}
+            {tr.gallery.filters[f.id]}
           </button>
         ))}
       </div>
@@ -82,7 +96,7 @@ export function TemplateGallery() {
               <span className="grid size-12 place-items-center rounded-full bg-accent text-white">
                 <Plus size={22} />
               </span>
-              Boş dump
+              {tr.gallery.blank}
             </Link>
           </li>
         )}
@@ -92,14 +106,15 @@ export function TemplateGallery() {
           </li>
         ))}
       </ul>
-      {!results.length && <p className="mt-10 text-center text-sm text-muted">Bu aramaya uyan şablon yok.</p>}
+      {!results.length && <p className="mt-10 text-center text-sm text-muted">{tr.gallery.noResults}</p>}
 
-      <TemplateDetail t={open} onClose={() => setOpen(null)} onOpenOther={setOpen} />
+      <TemplateDetail t={open} templates={templates} onClose={() => setOpen(null)} onOpenOther={setOpen} />
     </>
   );
 }
 
 function TemplateCard({ t, onOpen }: { t: Template; onOpen: () => void }) {
+  const { t: tr } = useT();
   const pages = templatePages(t);
   return (
     <button type="button" onClick={onOpen} className="group block w-full text-left">
@@ -121,7 +136,7 @@ function TemplateCard({ t, onOpen }: { t: Template; onOpen: () => void }) {
         {t.tier === "creator" && <Crown />}
       </span>
       <span className="block text-xs text-muted">
-        {pages > 1 ? `Carousel · ${pages} sayfa` : "Tek post"} · {photoCount(t)} foto
+        {formatLine(t, tr.gallery)}
       </span>
     </button>
   );
@@ -129,13 +144,16 @@ function TemplateCard({ t, onOpen }: { t: Template; onOpen: () => void }) {
 
 function TemplateDetail({
   t,
+  templates,
   onClose,
   onOpenOther,
 }: {
   t: Template | null;
+  templates: Template[];
   onClose: () => void;
   onOpenOther: (t: Template) => void;
 }) {
+  const { t: tr } = useT();
   const router = useRouter();
   if (!t) return null;
   const pages = templatePages(t);
@@ -149,7 +167,7 @@ function TemplateDetail({
         </div>
         <div className="flex flex-col gap-4">
           <p className="text-sm text-muted">
-            {pages > 1 ? `Carousel · ${pages} sayfa` : "Tek post"} · {photoCount(t)} fotoğraf · 3:4
+            {formatLine(t, tr.gallery, true)} · 3:4
           </p>
           <div className="flex flex-wrap gap-1.5">
             {t.tags.map((tag) => (
@@ -160,7 +178,7 @@ function TemplateDetail({
           </div>
           {t.tier === "creator" && (
             <p className="flex items-center gap-1.5 text-sm">
-              <Crown /> Creator ve Studio planlarında
+              <Crown /> {tr.gallery.premiumPlans}
             </p>
           )}
           <button
@@ -172,15 +190,15 @@ function TemplateDetail({
             }}
             className="mt-2 rounded-full bg-accent py-3.5 text-sm font-medium text-white shadow-[0_12px_30px_-10px_var(--color-accent)] transition hover:bg-accent-strong"
           >
-            Bu şablonu kullan
+            {tr.gallery.use}
           </button>
-          <p className="text-xs text-muted">Şablon boş kutularla açılır; fotoğraflarını yükleyince sırayla yerleşir.</p>
+          <p className="text-xs text-muted">{tr.gallery.useHint}</p>
         </div>
       </div>
 
-      <h3 className="mt-8 mb-3 text-sm font-semibold">Benzer şablonlar</h3>
+      <h3 className="mt-8 mb-3 text-sm font-semibold">{tr.gallery.similar}</h3>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {similarTemplates(t).map((x) => (
+        {similarTemplates(t).map((s) => templates.find((x) => x.id === s.id) ?? s).map((x) => (
           <li key={x.id}>
             <button type="button" onClick={() => onOpenOther(x)} className="w-full text-left">
               <span className="block aspect-[3/4] overflow-hidden rounded-xl bg-hover p-2 ring-1 ring-border hover:ring-accent">

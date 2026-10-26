@@ -10,21 +10,10 @@ import { useMockTiers, useTier } from "@/lib/store/tier";
 import { Segmented } from "@/components/ui/Segmented";
 import { checkoutUrl, type Period } from "@/lib/billing";
 import { signInWithGoogle } from "@/lib/supabase/client";
-import { TIER_LABELS, TIER_PRICES, tierFeatures, type Feature } from "@/lib/tiers";
+import { TIER_LABELS, TIER_PRICES, tierFeatures } from "@/lib/tiers";
 import type { Tier } from "@/lib/types";
 import { cn } from "@/lib/cn";
-
-type PaywallReason = Feature | "maxPhotos" | "maxPages";
-
-const REASONS: Record<PaywallReason, string> = {
-  maxPhotos: "Daha fazla fotoğraf eklemek",
-  maxPages: "Daha fazla sayfa eklemek",
-  premiumTemplates: "Premium şablonlar",
-  stamp: "Retro tarih damgası",
-  zip: "ZIP olarak toplu indirme",
-  hiRes: "2K / 4K dışa aktarma",
-  brandKit: "Marka kiti ve özel fontlar",
-};
+import { format, useT } from "@/lib/i18n/app";
 
 export function PaywallModal() {
   const { open, feature } = useUi((s) => s.modals.paywall);
@@ -32,6 +21,8 @@ export function PaywallModal() {
   const account = useTier((s) => s.account);
   const mock = useMockTiers();
   const [period, setPeriod] = useState<Period>("monthly");
+  const { lang, t } = useT();
+  const p = t.paywall;
   const close = () => useUi.getState().closePaywall();
 
   const canCheckout = Boolean(account?.billingEnabled);
@@ -55,28 +46,28 @@ export function PaywallModal() {
   };
 
   const label = (tier: Tier) => {
-    if (tier === current) return "Mevcut plan";
-    if (tier === "free") return mock ? "Free'ye geç" : "Portal'dan değiştir";
-    if (!mock && !canCheckout) return "Yakında";
-    if (needsSignIn) return "Giriş yap ve devam et";
-    return `${TIER_LABELS[tier]}'a geç`;
+    if (tier === current) return p.current;
+    if (tier === "free") return mock ? p.toFree : p.viaPortal;
+    if (!mock && !canCheckout) return p.soon;
+    if (needsSignIn) return p.signInContinue;
+    return format(p.switchTo, { tier: TIER_LABELS[tier] });
   };
 
   return (
     <Modal
       open={open}
       onOpenChange={(o) => !o && close()}
-      title={feature ? `${REASONS[feature]} için planını yükselt` : "Planlar"}
-      description="Ödeme anında kartının bankası tutarı TL'ye çevirir. İstediğin zaman iptal edebilirsin."
+      title={feature ? format(p.title, { reason: p.reasons[feature] }) : p.plans}
+      description={p.description}
     >
       <div className="mb-4 flex justify-center">
         <Segmented
-          aria-label="Faturalandırma dönemi"
+          aria-label={p.period}
           value={period}
           onChange={setPeriod}
           options={[
-            { value: "monthly", label: "Aylık" },
-            { value: "yearly", label: "Yıllık −30%" },
+            { value: "monthly", label: p.monthly },
+            { value: "yearly", label: p.yearly },
           ]}
         />
       </div>
@@ -98,19 +89,19 @@ export function PaywallModal() {
                   {TIER_LABELS[tier]}
                   {tier !== "free" && <Crown />}
                   {highlight && (
-                    <span className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[11px] text-white">Popüler</span>
+                    <span className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[11px] text-white">{p.popular}</span>
                   )}
                 </p>
                 <p className="mt-2 text-3xl font-semibold tracking-tight tabular-nums">
                   ${Number.isInteger(price) ? price : price.toFixed(2)}
-                  <span className="text-sm font-normal text-muted">/ay</span>
+                  <span className="text-sm font-normal text-muted">{p.perMonth}</span>
                 </p>
                 {period === "yearly" && tier !== "free" && (
-                  <p className="text-xs text-muted">yıllık ${TIER_PRICES[tier].yearly}</p>
+                  <p className="text-xs text-muted">{format(p.billedYearly, { n: TIER_PRICES[tier].yearly })}</p>
                 )}
               </div>
               <ul className="flex flex-1 flex-col gap-2 text-sm">
-                {tierFeatures(tier).map((f) => (
+                {tierFeatures(tier, lang).map((f) => (
                   <li key={f} className="flex gap-2">
                     <Check size={16} className="mt-0.5 shrink-0 text-accent" />
                     {f}
@@ -125,11 +116,7 @@ export function PaywallModal() {
         })}
       </ul>
       <p className="mt-4 text-center text-xs text-muted">
-        {mock
-          ? "Geliştirme modu: ödeme bağlı değil, plan anında değişir."
-          : canCheckout
-            ? "Ödeme Lemon Squeezy üzerinden güvenle alınır; fatura e-postana gelir."
-            : "Ücretli planlar çok yakında açılıyor."}
+        {mock ? p.devNote : canCheckout ? p.checkoutNote : p.soonNote}
       </p>
     </Modal>
   );

@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/Button";
 import { useAssets } from "@/lib/store/assets";
 import { getTemplate } from "@/lib/templates";
 import { assetRefs } from "@/lib/agent/context";
-import { TOOL_LABELS } from "@/lib/agent/applyToolCall";
 import type { AgentToolName } from "@/lib/agent/tools";
 import { cn } from "@/lib/cn";
+import { format, useLocalizeTemplate, useT } from "@/lib/i18n/app";
 
 const ICONS: Record<AgentToolName, LucideIcon> = {
   reorder_photos: ArrowDownUp,
@@ -38,6 +38,9 @@ function RefThumbs({ refs }: { refs: string[] }) {
 }
 
 function Preview({ name, input }: { name: AgentToolName; input: Record<string, unknown> }) {
+  const { t } = useT();
+  const localize = useLocalizeTemplate();
+  const template = name === "apply_template" ? getTemplate(input.templateId as string) : undefined;
   switch (name) {
     case "reorder_photos":
       return <RefThumbs refs={(input.order as string[]) ?? []} />;
@@ -52,11 +55,11 @@ function Preview({ name, input }: { name: AgentToolName; input: Record<string, u
         </span>
       );
     case "apply_template":
-      return <span className="text-xs text-muted">{getTemplate(input.templateId as string)?.title ?? (input.templateId as string)}</span>;
+      return <span className="text-xs text-muted">{template ? localize(template).title : (input.templateId as string)}</span>;
     case "add_text":
       return (
         <span className="text-xs text-muted">
-          Sayfa {input.page as number}: “{input.text as string}”
+          {format(t.agent.textOnPage, { page: input.page as number, text: input.text as string })}
         </span>
       );
     default:
@@ -89,7 +92,7 @@ function CaptionPicker({ captions, hashtags }: { captions: string[]; hashtags: s
   );
 }
 
-/** One assistant suggestion: preview + Uygula/Yoksay while pending, a compact receipt afterwards. */
+/** One assistant suggestion: preview + Apply/Dismiss while pending, a compact receipt afterwards. */
 export function SuggestionCard({
   name,
   input,
@@ -106,16 +109,17 @@ export function SuggestionCard({
   onDismiss: () => void;
 }) {
   const Icon = ICONS[name];
+  const a = useT().t.agent;
   if (state === "streaming" || !input) {
-    return <div className="h-16 animate-pulse rounded-2xl bg-hover" aria-label="Öneri hazırlanıyor" />;
+    return <div className="h-16 animate-pulse rounded-2xl bg-hover" aria-label={a.preparing} />;
   }
 
   if (name === "suggest_caption") {
     return (
       <div className="rounded-2xl border border-border bg-hover p-3">
         <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold">
-          <Icon size={14} className="text-accent" /> {TOOL_LABELS[name]}
-          <span className="ml-auto font-normal text-muted">kopyalamak için dokun</span>
+          <Icon size={14} className="text-accent" /> {a.tools[name]}
+          <span className="ml-auto font-normal text-muted">{a.tapToCopy}</span>
         </p>
         <CaptionPicker captions={(input.captions as string[]) ?? []} hashtags={(input.hashtags as string[]) ?? []} />
       </div>
@@ -126,10 +130,10 @@ export function SuggestionCard({
   return (
     <div className={cn("rounded-2xl border p-3", state === "pending" ? "border-accent/40 bg-accent-soft" : "border-border bg-hover opacity-80")}>
       <p className="flex items-center gap-1.5 text-xs font-semibold">
-        <Icon size={14} className="text-accent" /> {TOOL_LABELS[name]}
+        <Icon size={14} className="text-accent" /> {a.tools[name]}
         {state === "done" && (
           <span className={cn("ml-auto font-medium", output?.applied ? "text-[#34c759]" : "text-muted")}>
-            {output?.applied ? "Uygulandı" : "Yoksayıldı"}
+            {output?.applied ? a.applied : a.dismissed}
           </span>
         )}
       </p>
@@ -141,10 +145,10 @@ export function SuggestionCard({
       {state === "pending" && (
         <div className="mt-3 flex gap-2">
           <Button size="sm" variant="accent" onClick={onApply}>
-            <Check size={14} /> Uygula
+            <Check size={14} /> {a.apply}
           </Button>
           <Button size="sm" variant="ghost" onClick={onDismiss}>
-            <X size={14} /> Yoksay
+            <X size={14} /> {a.dismiss}
           </Button>
         </div>
       )}

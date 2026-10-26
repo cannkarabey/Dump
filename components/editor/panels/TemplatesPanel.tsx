@@ -11,16 +11,20 @@ import { tierAllows, TIER_LIMITS } from "@/lib/tiers";
 import { dominantMonth, monthLabel } from "@/lib/month";
 import { Crown } from "@/components/ui/Crown";
 import { TemplatePreview } from "../TemplatePreview";
+import { format, useLocalizeTemplate, useT } from "@/lib/i18n/app";
+import { at } from "@/lib/i18n/appDictionary";
 
 export function useApplyTemplate() {
-  return (t: Template) => {
+  const localize = useLocalizeTemplate();
+  return (original: Template) => {
+    const t = localize(original);
     const tier = useTier.getState().tier;
     if (t.tier === "creator" && !tierAllows(tier, "premiumTemplates")) {
       useUi.getState().openPaywall("premiumTemplates");
       return;
     }
     const { doc, replaceDoc } = useDoc.getState();
-    if (doc.elements.length && !window.confirm("Mevcut düzen bu şablonla değişecek. Devam edilsin mi? (⌘Z ile geri alabilirsin)")) {
+    if (doc.elements.length && !window.confirm(at().templatesPanel.confirmReplace)) {
       return;
     }
     const { assets, order } = useAssets.getState();
@@ -37,7 +41,7 @@ export function useApplyTemplate() {
       .getState()
       .showNotice(
         result.unplaced
-          ? `${result.unplaced} fotoğraf yerleşmedi; yükleme panelinden boş slot'lara sürükleyebilirsin.`
+          ? format(at().templatesPanel.unplaced, { n: result.unplaced })
           : null,
       );
   };
@@ -46,6 +50,8 @@ export function useApplyTemplate() {
 export function TemplatesPanel() {
   const apply = useApplyTemplate();
   const canPremium = useTier((s) => tierAllows(s.tier, "premiumTemplates"));
+  const { t: tr } = useT();
+  const localize = useLocalizeTemplate();
 
   return (
     <ul className="grid grid-cols-2 gap-3">
@@ -65,9 +71,11 @@ export function TemplatesPanel() {
                 <TemplatePreview t={t} />
               </span>
               <span className="mt-2 flex items-center gap-1.5 px-1 text-[13px] font-medium">
-                {t.title}
+                {localize(t).title}
                 {t.tier === "creator" && !canPremium && <Crown />}
-                <span className="ml-auto text-xs text-muted">{pages > 1 ? `${pages} sayfa` : "Tek"}</span>
+                <span className="ml-auto text-xs text-muted">
+                  {pages > 1 ? format(tr.templatesPanel.pages, { n: pages }) : tr.templatesPanel.single}
+                </span>
               </span>
             </button>
           </li>

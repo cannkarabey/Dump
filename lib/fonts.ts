@@ -1,12 +1,13 @@
 import type { FontKey } from "./types";
 
+/** Brand names; descriptive labels for some come from the app dictionary (fonts). */
 export const FONT_OPTIONS: { key: FontKey; label: string; cssVar: string }[] = [
   { key: "inter", label: "Inter", cssVar: "--font-inter" },
   { key: "playfair", label: "Playfair", cssVar: "--font-playfair" },
   { key: "space", label: "Space Grotesk", cssVar: "--font-space-grotesk" },
-  { key: "caveat", label: "Caveat (el yazısı)", cssVar: "--font-caveat" },
+  { key: "caveat", label: "Caveat", cssVar: "--font-caveat" },
   { key: "pixelify", label: "Pixelify", cssVar: "--font-pixelify" },
-  { key: "vt323", label: "VT323 (dijital)", cssVar: "--font-vt323" },
+  { key: "vt323", label: "VT323", cssVar: "--font-vt323" },
 ];
 
 const cache = new Map<FontKey, string>();

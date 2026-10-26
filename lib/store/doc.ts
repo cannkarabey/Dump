@@ -2,13 +2,14 @@ import { create, useStore } from "zustand";
 import { temporal, type TemporalState } from "zundo";
 import { nanoid } from "nanoid";
 import type { DumpDoc, DumpFormat, El } from "@/lib/types";
+import { at } from "@/lib/i18n/appDictionary";
 
 export const DEFAULT_FORMAT: DumpFormat = { w: 1080, h: 1440, pages: 1, mode: "single" };
 
 export function createDoc(format: DumpFormat = DEFAULT_FORMAT, id = nanoid(10)): DumpDoc {
   return {
     id,
-    title: "Adsız dump",
+    title: at().editor.untitled,
     format,
     background: "#ffffff",
     elements: [],

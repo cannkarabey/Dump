@@ -1,7 +1,7 @@
 import { convertToModelMessages, createUIMessageStreamResponse, streamText, toUIMessageStream } from "ai";
 import { createGoogle } from "@ai-sdk/google";
 import { agentTools, type AgentUIMessage } from "@/lib/agent/tools";
-import { SYSTEM_TR } from "@/lib/agent/systemPrompt";
+import { systemPrompt } from "@/lib/agent/systemPrompt";
 import { AGENT_MODELS, agentError, geminiApiKey } from "@/lib/agent/config";
 import { checkQuota } from "@/lib/agent/quota";
 import { requestIdentity } from "@/lib/agent/identity";
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   const apiKey = geminiApiKey();
   if (!apiKey) return agentError("not_configured", 503);
 
-  let body: { messages?: AgentUIMessage[]; deep?: boolean };
+  let body: { messages?: AgentUIMessage[]; deep?: boolean; lang?: string };
   try {
     body = await req.json();
   } catch {
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
   const google = createGoogle({ apiKey });
   const result = streamText({
     model: google(deep ? AGENT_MODELS.deep : AGENT_MODELS.chat),
-    system: SYSTEM_TR,
+    system: systemPrompt(body.lang),
     messages: await convertToModelMessages(pruneImages(messages.slice(-MAX_MESSAGES))),
     tools: agentTools,
   });
@@ -55,7 +55,9 @@ export async function POST(req: Request) {
       stream: result.stream,
       onError: (error) => {
         console.error("[agent]", error);
-        return "Asistan şu an yanıt veremedi. Birazdan tekrar dene.";
+        return body.lang === "en"
+          ? "The assistant couldn't respond right now. Try again shortly."
+          : "Asistan şu an yanıt veremedi. Birazdan tekrar dene.";
       },
     }),
   });

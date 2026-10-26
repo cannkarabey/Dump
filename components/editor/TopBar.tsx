@@ -14,11 +14,14 @@ import { useDoc, useDocHistory } from "@/lib/store/doc";
 import { TIER_LABELS } from "@/lib/tiers";
 import type { Tier } from "@/lib/types";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/app";
 
 const ZOOM_STEP = 1.2;
 const DEV = process.env.NODE_ENV === "development";
 
 export function TopBar() {
+  const { t } = useT();
+  const e = t.editor;
   const zoom = useUi((s) => s.zoom);
   const setZoom = useUi((s) => s.setZoom);
   const tier = useTier((s) => s.tier);
@@ -31,7 +34,7 @@ export function TopBar() {
 
   return (
     <header className="col-span-4 flex items-center gap-3 px-2">
-      <Link href="/app" className="flex items-center gap-2 pr-2" aria-label="Dump'larım">
+      <Link href="/app" className="flex items-center gap-2 pr-2" aria-label={e.myDumps}>
         <Logo />
         <span className="font-display text-lg font-bold tracking-tight">dump</span>
       </Link>
@@ -40,31 +43,31 @@ export function TopBar() {
         // Uncontrolled + commit on blur, so typing doesn't create one undo step per keystroke.
         key={title}
         defaultValue={title}
-        onBlur={(e) => setTitle(e.target.value.trim() || "Adsız dump")}
-        onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
-        aria-label="Dump adı"
+        onBlur={(ev) => setTitle(ev.target.value.trim() || e.untitled)}
+        onKeyDown={(ev) => ev.key === "Enter" && ev.currentTarget.blur()}
+        aria-label={e.titleLabel}
         className="h-8 w-44 rounded-lg bg-transparent px-2 text-sm font-medium outline-none hover:bg-hover focus:bg-hover"
       />
       <SaveIndicator />
 
       <div className="mx-auto flex items-center gap-1">
-        <Tooltip content="Geri al (⌘Z)">
-          <IconButton label="Geri al" disabled={!canUndo} onClick={() => undo()}>
+        <Tooltip content={e.undoHint}>
+          <IconButton label={e.undo} disabled={!canUndo} onClick={() => undo()}>
             <Undo2 size={17} />
           </IconButton>
         </Tooltip>
-        <Tooltip content="Yinele (⇧⌘Z)">
-          <IconButton label="Yinele" disabled={!canRedo} onClick={() => redo()}>
+        <Tooltip content={e.redoHint}>
+          <IconButton label={e.redo} disabled={!canRedo} onClick={() => redo()}>
             <Redo2 size={17} />
           </IconButton>
         </Tooltip>
 
         <div className="mx-2 h-5 w-px bg-border" />
 
-        <IconButton label="Uzaklaştır" onClick={() => setZoom(zoom / ZOOM_STEP)}>
+        <IconButton label={e.zoomOut} onClick={() => setZoom(zoom / ZOOM_STEP)}>
           <Minus size={17} />
         </IconButton>
-        <Tooltip content="Ekrana sığdır">
+        <Tooltip content={e.fit}>
           <button
             type="button"
             onClick={() => useUi.getState().requestFit()}
@@ -73,15 +76,15 @@ export function TopBar() {
             {Math.round(zoom * 100)}%
           </button>
         </Tooltip>
-        <IconButton label="Yakınlaştır" onClick={() => setZoom(zoom * ZOOM_STEP)}>
+        <IconButton label={e.zoomIn} onClick={() => setZoom(zoom * ZOOM_STEP)}>
           <Plus size={17} />
         </IconButton>
       </div>
 
-      <Tooltip content="Fotoğrafları tarihe göre sırala, ay kapağı ve renk paleti oluştur">
+      <Tooltip content={e.monthDumpHint}>
         <Button variant="secondary" size="sm" onClick={runMonthDump}>
           <Sparkles size={15} className="text-accent" />
-          Ayın Dump&apos;ı
+          {e.monthDump}
         </Button>
       </Tooltip>
       {DEV && <DevTemplateExport />}
@@ -96,25 +99,19 @@ export function TopBar() {
       </span>
       <Button variant="accent" size="sm" onClick={() => useUi.getState().openModal("export")}>
         <Download size={15} />
-        Dışa aktar
+        {e.export}
       </Button>
     </header>
   );
 }
 
-const SAVE_LABELS = {
-  idle: "Değişiklikler bu cihazda otomatik kaydedilir",
-  saving: "Kaydediliyor…",
-  saved: "Bu cihazda kaydedildi",
-  error: "Kaydedilemedi — tarayıcı depolaması dolu ya da kapalı olabilir",
-} as const;
-
 function SaveIndicator() {
   const state = useUi((s) => s.saveState);
+  const label = useT().t.editor.save[state];
   const Icon = state === "saving" ? Loader2 : state === "error" ? CloudOff : state === "saved" ? CloudCheck : Cloud;
   return (
-    <Tooltip content={SAVE_LABELS[state]}>
-      <span role="status" aria-label={SAVE_LABELS[state]} className={cn("text-muted", state === "error" && "text-[#ff453a]")}>
+    <Tooltip content={label}>
+      <span role="status" aria-label={label} className={cn("text-muted", state === "error" && "text-[#ff453a]")}>
         <Icon size={16} className={state === "saving" ? "animate-spin" : undefined} />
       </span>
     </Tooltip>
@@ -123,10 +120,11 @@ function SaveIndicator() {
 
 /** Dev-only: download the open doc as a template JSON for lib/templates/data. */
 function DevTemplateExport() {
+  const { t } = useT();
   return (
-    <Tooltip content="Şablon olarak dışa aktar (dev)">
+    <Tooltip content={t.editor.exportTemplateDev}>
       <IconButton
-        label="Şablon olarak dışa aktar"
+        label={t.editor.exportTemplate}
         size="sm"
         onClick={() => {
           const t = templateFromDoc(useDoc.getState().doc);

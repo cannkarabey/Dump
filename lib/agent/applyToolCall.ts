@@ -11,6 +11,8 @@ import { tierAllows, TIER_LIMITS } from "@/lib/tiers";
 import type { TextEl } from "@/lib/types";
 import { agentTools, type AgentToolName } from "./tools";
 import { assetRefs, photosInReadingOrder } from "./context";
+import { appLocale, at } from "@/lib/i18n/appDictionary";
+import { localizeTemplate } from "@/lib/templates/i18n";
 
 export interface ApplyResult {
   applied: boolean;
@@ -25,8 +27,9 @@ const STYLE_TO_PRESET = { title: "title", caption: "caption", bubble: "bubble", 
  * the model's arguments are untrusted, and refs/ids must exist in the dump the user has open now.
  */
 export function applyToolCall(name: AgentToolName, rawInput: unknown): ApplyResult {
+  const msg = at().agent.results;
   const parsed = agentTools[name].inputSchema.safeParse(rawInput);
-  if (!parsed.success) return { applied: false, message: "Bu öneri geçersiz görünüyor." };
+  if (!parsed.success) return { applied: false, message: msg.invalid };
   const input = parsed.data as Record<string, unknown>;
 
   const docStore = useDoc.getState();
@@ -42,7 +45,7 @@ export function applyToolCall(name: AgentToolName, rawInput: unknown): ApplyResu
       const wanted = [...new Set((input.order as string[]).map(resolve))].filter(
         (id): id is string => Boolean(id) && current.includes(id!),
       );
-      if (wanted.length < 2) return { applied: false, message: "Önerilen fotoğraflar artık dump'ta değil." };
+      if (wanted.length < 2) return { applied: false, message: msg.photosGone };
       const sequence = [...wanted, ...current.filter((id) => !wanted.includes(id))];
       docStore.updateElements(photos.map((p, i) => ({ id: p.id, patch: { assetId: sequence[i] } })));
       return { applied: true };
@@ -50,7 +53,7 @@ export function applyToolCall(name: AgentToolName, rawInput: unknown): ApplyResu
 
     case "set_cover": {
       const target = resolve(input.photo);
-      if (!target || !assets[target] || !photos.length) return { applied: false, message: "Bu fotoğraf bulunamadı." };
+      if (!target || !assets[target] || !photos.length) return { applied: false, message: msg.photoNotFound };
       const cover = photos[0];
       const holder = photos.find((p) => p.assetId === target);
       docStore.updateElements([
@@ -63,7 +66,7 @@ export function applyToolCall(name: AgentToolName, rawInput: unknown): ApplyResu
     case "remove_photo": {
       const target = resolve(input.photo);
       const hits = doc.elements.filter((el) => (el.type === "image" || el.type === "slot") && el.assetId === target);
-      if (!target || !hits.length) return { applied: false, message: "Bu fotoğraf zaten dump'ta değil." };
+      if (!target || !hits.length) return { applied: false, message: msg.alreadyRemoved };
       docStore.replaceDoc({
         ...doc,
         elements: doc.elements.flatMap((el) => {
@@ -77,12 +80,13 @@ export function applyToolCall(name: AgentToolName, rawInput: unknown): ApplyResu
     }
 
     case "apply_template": {
-      const t = getTemplate(input.templateId as string);
-      if (!t) return { applied: false, message: "Bu şablon bulunamadı." };
+      const found = getTemplate(input.templateId as string);
+      if (!found) return { applied: false, message: msg.templateNotFound };
+      const t = localizeTemplate(found, appLocale());
       const tier = useTier.getState().tier;
       if (t.tier === "creator" && !tierAllows(tier, "premiumTemplates")) {
         useUi.getState().openPaywall("premiumTemplates");
-        return { applied: false, message: "Bu şablon Creator planında." };
+        return { applied: false, message: msg.templateCreator };
       }
       // Keep the current story order: placed photos first, then the unused ones.
       const placedIds = photos.map((p) => p.assetId);
@@ -136,14 +140,3 @@ export function applyToolCall(name: AgentToolName, rawInput: unknown): ApplyResu
       return { applied: true };
   }
 }
-
-/** Human labels for suggestion cards. */
-export const TOOL_LABELS: Record<AgentToolName, string> = {
-  reorder_photos: "Sıralamayı düzelt",
-  set_cover: "Kapağı değiştir",
-  remove_photo: "Fotoğrafı çıkar",
-  apply_template: "Şablon uygula",
-  set_background: "Arka planı değiştir",
-  add_text: "Metin ekle",
-  suggest_caption: "Caption önerisi",
-};

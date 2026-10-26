@@ -1,14 +1,16 @@
 import { TEMPLATES } from "@/lib/templates";
 import { EFFECTS } from "@/lib/motion";
 import { TemplatePreview } from "@/components/editor/TemplatePreview";
+import { localizeTemplate } from "@/lib/templates/i18n";
+import type { Locale } from "@/lib/i18n/config";
 
 /**
  * Endless strip of template previews (our own content, no third-party logos). The list is
  * rendered twice for a seamless loop; the copy is aria-hidden. Pauses on hover/focus.
  */
-export function Marquee({ label }: { label: string }) {
+export function Marquee({ lang, label }: { lang: Locale; label: string }) {
   if (!EFFECTS.marquee) return null;
-  const items = TEMPLATES.slice(0, 10);
+  const items = TEMPLATES.slice(0, 10).map((t) => localizeTemplate(t, lang));
   const row = (hidden: boolean) =>
     items.map((t) => {
       const pages = t.mode === "single" ? 1 : t.pages;

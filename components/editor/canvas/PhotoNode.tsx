@@ -7,6 +7,7 @@ import { useAssets } from "@/lib/store/assets";
 import { coverCrop } from "@/lib/geometry";
 import { fontFamilyFor } from "@/lib/fonts";
 import { stampLabel } from "@/lib/month";
+import { at } from "@/lib/i18n/appDictionary";
 import type { ImageEl, SlotEl } from "@/lib/types";
 import { bakeSize, useElementHandlers } from "./useElementHandlers";
 import { filmHoles, frameInsets } from "./frames";
@@ -94,7 +95,8 @@ export function PhotoNode({
           />
           <Text
             {...inner}
-            text="+ Fotoğraf ekle"
+            // Konva renders through its own reconciler; module locale avoids relying on context bridging.
+            text={at().editor.slotPlaceholder}
             align="center"
             verticalAlign="middle"
             fontSize={Math.max(14, s * 0.06)}

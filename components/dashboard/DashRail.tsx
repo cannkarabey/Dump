@@ -5,29 +5,35 @@ import { usePathname } from "next/navigation";
 import { CircleUser, Crown, FolderOpen, LayoutTemplate, Plus } from "lucide-react";
 import { LogoMark } from "@/components/marketing/Logo";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/app";
+import { href as marketingHref } from "@/lib/i18n/config";
+import { AppLangSwitch } from "./AppLangSwitch";
 
-const ITEMS = [
-  { href: "/app", label: "Dump'larım", icon: FolderOpen },
-  { href: "/app/templates", label: "Şablonlar", icon: LayoutTemplate },
-  { href: "/#pricing", label: "Plan", icon: Crown },
-  { href: "/app/account", label: "Hesap", icon: CircleUser },
-];
+/** Public /app paths; the internal /app/[lang] prefix is stripped in case SSR reports it. */
+const publicPath = (pathname: string) => pathname.replace(/^\/app\/(?:tr|en)(?=\/|$)/, "/app");
 
 export function DashRail() {
-  const pathname = usePathname();
+  const pathname = publicPath(usePathname());
+  const { lang, t } = useT();
+  const items = [
+    { href: "/app", label: t.rail.dumps, icon: FolderOpen },
+    { href: "/app/templates", label: t.rail.templates, icon: LayoutTemplate },
+    { href: marketingHref(lang, "home", "pricing"), label: t.rail.plan, icon: Crown },
+    { href: "/app/account", label: t.rail.account, icon: CircleUser },
+  ];
   return (
-    <nav aria-label="Uygulama" className="flex w-[92px] shrink-0 flex-col items-center gap-2 border-r border-border bg-panel py-4">
-      <Link href="/" aria-label="Ana sayfa" className="mb-3">
+    <nav aria-label={t.rail.label} className="flex w-[92px] shrink-0 flex-col items-center gap-2 border-r border-border bg-panel py-4">
+      <Link href={marketingHref(lang, "home")} aria-label={t.rail.home} className="mb-3">
         <LogoMark className="scale-125" />
       </Link>
       <Link href="/app/editor/new" className="group flex flex-col items-center gap-1 text-[11px] font-medium">
         <span className="grid size-12 place-items-center rounded-full bg-accent text-white shadow-[0_8px_24px_-8px_var(--color-accent)] transition group-hover:scale-105">
           <Plus size={22} />
         </span>
-        Oluştur
+        {t.rail.create}
       </Link>
       <ul className="mt-3 flex flex-col gap-1">
-        {ITEMS.map(({ href, label, icon: Icon }) => {
+        {items.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
             <li key={href}>
@@ -46,6 +52,9 @@ export function DashRail() {
           );
         })}
       </ul>
+      <div className="mt-auto">
+        <AppLangSwitch />
+      </div>
     </nav>
   );
 }

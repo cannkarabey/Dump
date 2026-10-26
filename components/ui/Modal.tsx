@@ -3,6 +3,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/app";
 
 export function Modal({
   open,
@@ -21,6 +22,7 @@ export function Modal({
   className?: string;
   hideClose?: boolean;
 }) {
+  const { t } = useT();
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -45,7 +47,7 @@ export function Modal({
           {children}
           {!hideClose && (
             <Dialog.Close
-              aria-label="Kapat"
+              aria-label={t.common.close}
               className="absolute top-4 right-4 grid size-9 place-items-center rounded-full text-muted hover:bg-hover hover:text-fg"
             >
               <X size={18} />

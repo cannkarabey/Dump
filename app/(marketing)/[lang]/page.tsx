@@ -18,7 +18,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   return (
     <>
       <Hero t={t.hero} mock={t.mock} />
-      <Marquee label={t.marquee.label} />
+      <Marquee lang={lang} label={t.marquee.label} />
       <WordReveal t={t.define} />
       <StickyStory t={t.story} />
       <AgentShowcase t={t.agent} />

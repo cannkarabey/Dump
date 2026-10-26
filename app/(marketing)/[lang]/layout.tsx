@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { SmoothScroll } from "@/components/marketing/SmoothScroll";
 import { GlassNav } from "@/components/marketing/GlassNav";
 import { Footer } from "@/components/marketing/Footer";
+import { LangCookie } from "@/components/marketing/LangSwitch";
 import { siteUrl } from "@/lib/site";
 import { isLocale, languageAlternates, LOCALES, ROUTES } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionary";
@@ -42,6 +43,7 @@ export default async function MarketingLayout({ children, params }: LayoutProps<
         <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:rounded-full focus:bg-fg focus:px-4 focus:py-2 focus:text-white">
           {lang === "tr" ? "İçeriğe geç" : "Skip to content"}
         </a>
+        <LangCookie lang={lang} />
         <GlassNav lang={lang} t={t.nav} />
         <main id="main" className="flex-1">
           {children}

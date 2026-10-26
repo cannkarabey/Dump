@@ -13,6 +13,7 @@ import { useLimits } from "@/lib/store/tier";
 import { aspectLabel, PRESET_GROUPS, PRESETS, type PresetGroup } from "@/lib/presets";
 import type { DumpMode } from "@/lib/types";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/app";
 
 const MIN_SIDE = 320;
 const MAX_SIDE = 4096;
@@ -22,6 +23,8 @@ export function NewDumpModal() {
   const close = () => useUi.getState().closeModal("newDump");
   const router = useRouter();
   const { maxPages } = useLimits();
+  const { t } = useT();
+  const n = t.newDump;
 
   const [step, setStep] = useState<1 | 2>(1);
   const [mode, setMode] = useState<DumpMode>("carousel");
@@ -53,20 +56,20 @@ export function NewDumpModal() {
         if (!o) close();
         if (!o) setStep(1);
       }}
-      title={step === 1 ? "Yeni dump" : "Boyut seç"}
-      description={step === 1 ? "Ne oluşturuyorsun?" : "Hazır bir boyut ya da kendi ölçün"}
+      title={step === 1 ? n.title : n.sizeTitle}
+      description={step === 1 ? n.description : n.sizeDescription}
     >
       {step === 1 ? (
         <div className="grid gap-4 sm:grid-cols-2">
           <ModeCard
-            title="Tek post"
-            text="Tek canvas, istediğin boyut."
+            title={n.single}
+            text={n.singleText}
             onClick={() => choose("single")}
             illustration={<div className="h-28 w-22 rotate-[-4deg] rounded-xl bg-gradient-to-br from-[#ffd29d] to-[#ff7a59] shadow-xl" />}
           />
           <ModeCard
-            title="Carousel"
-            text="Tek geniş canvas, kaydırınca akan slaytlar."
+            title={n.carousel}
+            text={n.carouselText}
             onClick={() => choose("carousel")}
             illustration={
               <div className="flex gap-1">
@@ -80,14 +83,14 @@ export function NewDumpModal() {
       ) : (
         <div className="flex flex-col gap-5">
           <div className="flex items-center gap-3">
-            <IconButton label="Geri" onClick={() => setStep(1)}>
+            <IconButton label={t.common.back} onClick={() => setStep(1)}>
               <ArrowLeft size={18} />
             </IconButton>
             <Segmented
-              aria-label="Platform"
+              aria-label={n.platform}
               value={group}
               onChange={setGroup}
-              options={PRESET_GROUPS.map((g) => ({ value: g.id, label: g.label }))}
+              options={PRESET_GROUPS.map((g) => ({ value: g, label: t.presets.groups[g] }))}
             />
           </div>
 
@@ -115,7 +118,7 @@ export function NewDumpModal() {
                         </span>
                       </span>
                     </span>
-                    <span className="text-sm font-semibold">{p.label}</span>
+                    <span className="text-sm font-semibold">{t.presets.labels[p.id] ?? p.label}</span>
                     <span className="-mt-2 text-xs text-muted tabular-nums">
                       {p.w} × {p.h} px
                     </span>
@@ -126,22 +129,22 @@ export function NewDumpModal() {
           </ul>
 
           <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-hover p-3">
-            <span className="text-sm font-semibold">Özel</span>
-            <SizeInput label="Genişlik" value={size.w} onChange={(w) => setSize((s) => ({ ...s, w }))} />
-            <IconButton label="En ve boyu değiştir" size="sm" onClick={() => setSize((s) => ({ w: s.h, h: s.w }))}>
+            <span className="text-sm font-semibold">{n.custom}</span>
+            <SizeInput label={n.width} value={size.w} onChange={(w) => setSize((s) => ({ ...s, w }))} />
+            <IconButton label={n.swap} size="sm" onClick={() => setSize((s) => ({ w: s.h, h: s.w }))}>
               <ArrowLeftRight size={15} />
             </IconButton>
-            <SizeInput label="Yükseklik" value={size.h} onChange={(h) => setSize((s) => ({ ...s, h }))} />
+            <SizeInput label={n.height} value={size.h} onChange={(h) => setSize((s) => ({ ...s, h }))} />
 
             {mode === "carousel" && (
               <div className="flex items-center gap-1.5 text-sm">
-                <span className="text-muted">Sayfa</span>
-                <IconButton label="Sayfa azalt" size="sm" onClick={() => setPages((n) => Math.max(2, n - 1))}>
+                <span className="text-muted">{n.pages}</span>
+                <IconButton label={n.fewerPages} size="sm" onClick={() => setPages((n) => Math.max(2, n - 1))}>
                   <Minus size={14} />
                 </IconButton>
                 <span className="w-5 text-center tabular-nums">{pages}</span>
                 <IconButton
-                  label="Sayfa artır"
+                  label={n.morePages}
                   size="sm"
                   onClick={() => setPages((n) => Math.min(maxPages, n + 1))}
                   disabled={pages >= maxPages}
@@ -152,7 +155,7 @@ export function NewDumpModal() {
             )}
 
             <Button variant="accent" className="ml-auto" onClick={create}>
-              Dump oluştur
+              {n.create}
             </Button>
           </div>
         </div>

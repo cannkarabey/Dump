@@ -3,8 +3,10 @@
 import { addText, TEXT_PRESETS } from "@/lib/addElements";
 import { FONT_OPTIONS } from "@/lib/fonts";
 import { cn } from "@/lib/cn";
+import { useT } from "@/lib/i18n/app";
 
 export function TextPanel() {
+  const { t } = useT();
   return (
     <div className="flex flex-col gap-3">
       <ul className="flex flex-col gap-2">
@@ -14,10 +16,10 @@ export function TextPanel() {
             <li key={p.id}>
               <button
                 type="button"
-                onClick={() => addText(p)}
+                onClick={() => addText(p, t.textPanel.presets[p.id].sample)}
                 className="flex w-full flex-col items-start gap-1 rounded-2xl bg-hover px-4 py-3 text-left transition hover:bg-active"
               >
-                <span className="text-xs text-muted">{p.label}</span>
+                <span className="text-xs text-muted">{t.textPanel.presets[p.id].label}</span>
                 <span
                   className={cn("truncate", p.bubble && "rounded-full bg-white px-3 py-1 text-[#1d1d1f]")}
                   style={{
@@ -27,14 +29,14 @@ export function TextPanel() {
                     color: p.bubble ? undefined : p.fill === "#1d1d1f" ? undefined : p.fill,
                   }}
                 >
-                  {p.sample}
+                  {t.textPanel.presets[p.id].sample}
                 </span>
               </button>
             </li>
           );
         })}
       </ul>
-      <p className="px-1 text-xs text-muted">Metni düzenlemek için canvas&apos;ta çift tıkla.</p>
+      <p className="px-1 text-xs text-muted">{t.textPanel.hint}</p>
     </div>
   );
 }

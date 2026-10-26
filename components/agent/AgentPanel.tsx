@@ -11,18 +11,11 @@ import { buildUserParts, createAgentTransport, errorMessage, quotaListeners } fr
 import type { AgentToolName, AgentUIMessage } from "@/lib/agent/tools";
 import { cn } from "@/lib/cn";
 import { signInWithGoogle } from "@/lib/supabase/client";
+import { format, useT } from "@/lib/i18n/app";
 import { SuggestionCard } from "./SuggestionCard";
 import { VibeScoreCard } from "./VibeScoreCard";
 
 const CONSENT_KEY = "dc-ai-consent";
-
-const CHIPS: { label: string; text: string; images?: boolean; deep?: boolean }[] = [
-  { label: "Yorumla", text: "Bu dump'ı yorumlar mısın? En önemli 2-3 iyileştirmeyi öner.", images: true },
-  { label: "Derin yorum", text: "Dump'ımı detaylıca incele: kapak, sıralama, renk akışı ve tekrar eden kareler.", images: true, deep: true },
-  { label: "Sıralamayı düzelt", text: "Fotoğrafların sırasını daha iyi bir akış için düzenler misin?", images: true },
-  { label: "Caption yaz", text: "Bu dump için Türkçe caption ve hashtag öner." },
-  { label: "Daha minimal", text: "Dump'ı daha sade ve minimal göstermek için ne değiştirmeliyim?", images: true },
-];
 
 type ToolPart = Extract<AgentUIMessage["parts"][number], { type: `tool-${string}` }>;
 
@@ -56,7 +49,9 @@ export function AgentPanel() {
 }
 
 function Chat() {
-  const [transport] = useState(createAgentTransport);
+  const { lang, t } = useT();
+  const a = t.agent;
+  const [transport] = useState(() => createAgentTransport(lang));
   const { messages, sendMessage, addToolOutput, status, error, stop, clearError } = useChat<AgentUIMessage>({ transport });
   const [input, setInput] = useState("");
   const [remaining, setRemaining] = useState<number | null>(null);
@@ -102,10 +97,8 @@ function Chat() {
             <span className="grid size-11 place-items-center rounded-2xl bg-accent-soft text-accent">
               <Sparkles size={20} />
             </span>
-            <p className="text-sm font-semibold">Dump&apos;ına ikinci bir göz</p>
-            <p className="text-xs text-muted">
-              {hasPhotos ? "Aşağıdan bir kısayol seç ya da sorunu yaz." : "Önce birkaç fotoğraf ekle; asistan slaytlarına bakarak yorum yapar."}
-            </p>
+            <p className="text-sm font-semibold">{a.emptyTitle}</p>
+            <p className="text-xs text-muted">{hasPhotos ? a.emptyWithPhotos : a.emptyNoPhotos}</p>
           </div>
         )}
 
@@ -144,7 +137,7 @@ function Chat() {
         )}
 
         {status === "submitted" && (
-          <div className="flex gap-1 self-start rounded-2xl bg-hover px-3 py-3" aria-label="Asistan düşünüyor">
+          <div className="flex gap-1 self-start rounded-2xl bg-hover px-3 py-3" aria-label={a.thinking}>
             {[0, 1, 2].map((i) => (
               <span key={i} className="size-1.5 animate-bounce rounded-full bg-muted" style={{ animationDelay: `${i * 120}ms` }} />
             ))}
@@ -155,12 +148,12 @@ function Chat() {
             {errorMessage(error)}
             {(error as { code?: string }).code === "auth_required" && (
               <button type="button" onClick={() => void signInWithGoogle(window.location.pathname)} className="ml-1 font-medium text-accent underline">
-                Google ile giriş yap
+                {a.signIn}
               </button>
             )}
             {(error as { code?: string }).code === "quota" && (
               <button type="button" onClick={() => useUi.getState().openPaywall()} className="ml-1 font-medium text-accent underline">
-                Planlar
+                {a.plans}
               </button>
             )}
           </div>
@@ -168,7 +161,7 @@ function Chat() {
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {CHIPS.map((c) => (
+        {a.chips.map((c) => (
           <button
             key={c.label}
             type="button"
@@ -201,49 +194,49 @@ function Chat() {
             }
           }}
           rows={1}
-          placeholder="Asistana sor…"
-          aria-label="Asistana mesaj"
+          placeholder={a.placeholder}
+          aria-label={a.inputLabel}
           className="max-h-28 min-h-8 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-sm outline-none placeholder:text-muted"
         />
         {busy ? (
-          <Button type="button" size="sm" variant="secondary" onClick={() => void stop()} aria-label="Durdur">
+          <Button type="button" size="sm" variant="secondary" onClick={() => void stop()} aria-label={a.stop}>
             <Square size={13} />
           </Button>
         ) : (
-          <Button type="submit" size="sm" variant="accent" disabled={!input.trim()} aria-label="Gönder">
+          <Button type="submit" size="sm" variant="accent" disabled={!input.trim()} aria-label={a.send}>
             <ArrowUp size={15} />
           </Button>
         )}
       </form>
-      {remaining !== null && <p className="-mt-1 text-center text-[11px] text-muted">Bu dönem kalan hak: {remaining}</p>}
+      {remaining !== null && <p className="-mt-1 text-center text-[11px] text-muted">{format(a.remaining, { n: remaining })}</p>}
     </div>
   );
 }
 
 function UserBubble({ message }: { message: AgentUIMessage }) {
+  const { t } = useT();
   // The first text part is what the user typed; the rest is editor context (summary, page images).
   const first = message.parts.find((p) => p.type === "text");
   const images = message.parts.filter((p) => p.type === "file").length;
   return (
     <div className="flex max-w-[85%] flex-col items-end gap-1 self-end">
       <p className="rounded-2xl bg-accent px-3 py-2 text-[13px] leading-relaxed text-white">{first?.type === "text" ? first.text : ""}</p>
-      {images > 0 && <span className="text-[10px] text-muted">{images} sayfa görseli eklendi</span>}
+      {images > 0 && <span className="text-[10px] text-muted">{format(t.agent.imagesAttached, { n: images })}</span>}
     </div>
   );
 }
 
 function ConsentCard({ onAccept }: { onAccept: () => void }) {
+  const a = useT().t.agent;
   return (
     <div className="m-auto flex max-w-64 flex-col items-center gap-3 text-center">
       <span className="grid size-12 place-items-center rounded-2xl bg-accent-soft text-accent">
         <ShieldCheck size={22} />
       </span>
-      <p className="text-sm font-semibold">AI Asistan</p>
-      <p className="text-xs leading-relaxed text-muted">
-        Asistan, yorum yapmak için slaytlarının küçük önizlemelerini ve dump özetini Google Gemini&apos;ye gönderir. Önizlemeler bizim sunucumuzda saklanmaz. Fotoğrafların sen asistanı kullanmadıkça cihazından çıkmaz.
-      </p>
+      <p className="text-sm font-semibold">{a.consentTitle}</p>
+      <p className="text-xs leading-relaxed text-muted">{a.consentText}</p>
       <Button variant="accent" size="sm" onClick={onAccept}>
-        Anladım, devam et
+        {a.consentAccept}
       </Button>
     </div>
   );

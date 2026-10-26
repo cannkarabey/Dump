@@ -5,17 +5,20 @@ import { ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useUi } from "@/lib/store/ui";
 import { useDoc } from "@/lib/store/doc";
+import { useT } from "@/lib/i18n/app";
+
+function CanvasLoading() {
+  return <div className="grid size-full place-items-center text-sm text-muted">{useT().t.editor.loadingCanvas}</div>;
+}
 
 // Konva touches `window`, so the stage only ever renders in the browser.
-const CanvasStage = dynamic(() => import("./canvas/CanvasStage"), {
-  ssr: false,
-  loading: () => <div className="grid size-full place-items-center text-sm text-muted">Canvas yükleniyor…</div>,
-});
+const CanvasStage = dynamic(() => import("./canvas/CanvasStage"), { ssr: false, loading: () => <CanvasLoading /> });
 
 export function CanvasArea() {
   const notice = useUi((s) => s.notice);
   const showNotice = useUi((s) => s.showNotice);
   const empty = useDoc((s) => s.doc.elements.length === 0);
+  const { t } = useT();
 
   return (
     <main className="relative min-h-0 overflow-hidden rounded-[var(--radius-panel)] bg-canvas">
@@ -27,14 +30,14 @@ export function CanvasArea() {
             <span className="grid size-12 place-items-center rounded-full bg-accent-soft text-accent">
               <ImagePlus size={22} />
             </span>
-            <p className="text-base font-semibold">Fotoğraflarını buraya bırak</p>
-            <p className="max-w-60 text-sm text-muted">ya da bir şablonla başla, sonra fotoğrafları kutulara sürükle</p>
+            <p className="text-base font-semibold">{t.editor.dropTitle}</p>
+            <p className="max-w-60 text-sm text-muted">{t.editor.dropText}</p>
             <div className="pointer-events-auto flex gap-2">
               <Button size="sm" variant="accent" onClick={() => useUi.getState().setActivePanel("upload")}>
-                Fotoğraf ekle
+                {t.editor.addPhotos}
               </Button>
               <Button size="sm" variant="secondary" onClick={() => useUi.getState().setActivePanel("templates")}>
-                Şablonlar
+                {t.editor.templates}
               </Button>
             </div>
           </div>
@@ -47,7 +50,7 @@ export function CanvasArea() {
         >
           {notice}
           <button type="button" onClick={() => showNotice(null)} className="text-muted hover:text-fg">
-            Kapat
+            {t.common.close}
           </button>
         </div>
       )}

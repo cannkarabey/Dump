@@ -8,6 +8,8 @@ import { renderPageThumbs } from "@/lib/export";
 import type { AgentErrorCode } from "./config";
 import { summarizeDump } from "./context";
 import type { AgentUIMessage, VibeScore } from "./tools";
+import type { Locale } from "@/lib/i18n/config";
+import { at, format } from "@/lib/i18n/appDictionary";
 
 export class AgentRequestError extends Error {
   constructor(
@@ -33,8 +35,9 @@ const agentFetch: typeof fetch = async (input, init) => {
   return res;
 };
 
-export function createAgentTransport() {
-  return new DefaultChatTransport<AgentUIMessage>({ api: "/api/agent", fetch: agentFetch });
+/** `lang` picks the reply language (system prompt) on the server. */
+export function createAgentTransport(lang: Locale) {
+  return new DefaultChatTransport<AgentUIMessage>({ api: "/api/agent", fetch: agentFetch, body: { lang } });
 }
 
 /** Marker separating what the user typed from the context the editor attaches. */
@@ -53,7 +56,7 @@ export function pageImages(): FileUIPart[] {
   return renderPageThumbs(stage, doc).map((url, i) => ({
     type: "file",
     mediaType: "image/jpeg",
-    filename: `sayfa-${i + 1}.jpg`,
+    filename: `page-${i + 1}.jpg`,
     url,
   }));
 }
@@ -67,35 +70,35 @@ export function buildUserParts(text: string, withImages: boolean): AgentUIMessag
   ];
 }
 
-export async function requestVibeScore(): Promise<{ score: VibeScore; remaining: number }> {
+export async function requestVibeScore(lang: Locale): Promise<{ score: VibeScore; remaining: number }> {
   const res = await fetch("/api/agent/score", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ summary: currentSummary(), images: pageImages().map((f) => f.url) }),
+    body: JSON.stringify({ summary: currentSummary(), images: pageImages().map((f) => f.url), lang }),
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new AgentRequestError(body.error ?? "upstream", body);
   return body;
 }
 
-/** Turkish copy for every failure the panel can show. */
+/** User-facing copy (app language) for every failure the panel can show. */
 export function errorMessage(error: unknown): string {
+  const { locale, agent } = at();
+  const e = agent.errors;
   const code = error instanceof AgentRequestError ? error.code : "upstream";
   switch (code) {
     case "not_configured":
-      return process.env.NODE_ENV === "development"
-        ? "Asistan henüz bağlı değil: .env.local dosyasına GEMINI_API_KEY ekleyip geliştirme sunucusunu yeniden başlat."
-        : "Asistan şu an kullanılamıyor. Biraz sonra tekrar dene.";
+      return process.env.NODE_ENV === "development" ? e.notConfiguredDev : e.notConfigured;
     case "auth_required":
-      return "Asistanı kullanmak için ücretsiz giriş yap.";
+      return e.authRequired;
     case "quota": {
       const info = (error as AgentRequestError).info;
-      const when = info.reset ? new Date(info.reset).toLocaleString("tr-TR", { weekday: "long", hour: "2-digit", minute: "2-digit" }) : null;
-      return `${info.kind === "deep" ? "Derin yorum" : "Asistan"} hakkın doldu${when ? `; ${when} yenilenir` : ""}. Daha fazlası için planını yükselt.`;
+      const when = info.reset ? new Date(info.reset).toLocaleString(locale, { weekday: "long", hour: "2-digit", minute: "2-digit" }) : null;
+      return `${info.kind === "deep" ? e.quotaDeep : e.quotaChat}${when ? format(e.quotaReset, { when }) : ""}${e.quotaUpgrade}`;
     }
     case "bad_request":
-      return "İstek eksik görünüyor. Sayfayı yenileyip tekrar dene.";
+      return e.badRequest;
     default:
-      return "Asistan şu an yanıt veremedi. Birazdan tekrar dene.";
+      return e.upstream;
   }
 }

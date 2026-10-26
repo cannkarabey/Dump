@@ -1,10 +1,9 @@
 import type { Asset } from "./types";
+import { at } from "./i18n/appDictionary";
 
-const monthFormat = new Intl.DateTimeFormat("tr-TR", { month: "long" });
-
-/** "EKİM '26" */
-export function monthLabel(date: Date): string {
-  const month = monthFormat.format(date).toLocaleUpperCase("tr-TR");
+/** "EKİM '26" / "OCTOBER '26" in the app language. */
+export function monthLabel(date: Date, locale = at().locale): string {
+  const month = new Intl.DateTimeFormat(locale, { month: "long" }).format(date).toLocaleUpperCase(locale);
   return `${month} '${String(date.getFullYear()).slice(-2)}`;
 }
 

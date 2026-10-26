@@ -23,11 +23,15 @@ import { RightPanel } from "./RightPanel";
 import { NewDumpModal } from "./NewDumpModal";
 import { PaywallModal } from "./PaywallModal";
 import { ExportDialog } from "./ExportDialog";
+import { useT } from "@/lib/i18n/app";
+import { appLocale } from "@/lib/i18n/appDictionary";
+import { localizeTemplate } from "@/lib/templates/i18n";
 
 /** Starts a fresh doc laid out from a gallery template; slots stay empty for the user's photos. */
 function startFromTemplate(templateId: string): boolean {
-  const t = getTemplate(templateId);
-  if (!t) return false;
+  const found = getTemplate(templateId);
+  if (!found) return false;
+  const t = localizeTemplate(found, appLocale());
   const tier = useTier.getState().tier;
   const now = new Date();
   const { doc } = applyTemplate(t, createDoc(), [], {
@@ -44,8 +48,13 @@ function startFromTemplate(templateId: string): boolean {
   return true;
 }
 
+export function EditorLoading() {
+  return <div className="grid h-dvh place-items-center text-sm text-muted">{useT().t.editor.loading}</div>;
+}
+
 export function EditorRoot({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { t } = useT();
   const templateId = useSearchParams().get("template");
   // Only a saved dump that isn't already in memory needs a loading state.
   const [loading, setLoading] = useState(() => id !== "new" && useDoc.getState().doc.id !== id);
@@ -96,7 +105,7 @@ export function EditorRoot({ params }: { params: Promise<{ id: string }> }) {
         <FlyoutPanel />
         {loading ? (
           <div className="grid place-items-center rounded-[var(--radius-panel)] bg-canvas text-sm text-muted">
-            Dump yükleniyor…
+            {t.editor.loadingDump}
           </div>
         ) : (
           <CanvasArea />

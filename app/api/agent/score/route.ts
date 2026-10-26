@@ -1,7 +1,7 @@
 import { generateText, Output } from "ai";
 import { createGoogle } from "@ai-sdk/google";
 import { vibeScoreSchema } from "@/lib/agent/tools";
-import { SYSTEM_TR } from "@/lib/agent/systemPrompt";
+import { scorePrompt, systemPrompt } from "@/lib/agent/systemPrompt";
 import { AGENT_MODELS, agentError, geminiApiKey } from "@/lib/agent/config";
 import { checkQuota } from "@/lib/agent/quota";
 import { requestIdentity } from "@/lib/agent/identity";
@@ -10,12 +10,12 @@ export const maxDuration = 30;
 
 const MAX_IMAGES = 20;
 
-/** Vibe score: one structured request over the page thumbnails; counts as a "derin yorum". */
+/** Vibe score: one structured request over the page thumbnails; counts as a deep review. */
 export async function POST(req: Request) {
   const apiKey = geminiApiKey();
   if (!apiKey) return agentError("not_configured", 503);
 
-  let body: { summary?: string; images?: string[] };
+  let body: { summary?: string; images?: string[]; lang?: string };
   try {
     body = await req.json();
   } catch {
@@ -33,13 +33,13 @@ export async function POST(req: Request) {
   try {
     const { output } = await generateText({
       model: createGoogle({ apiKey })(AGENT_MODELS.deep),
-      system: SYSTEM_TR,
+      system: systemPrompt(body.lang),
       output: Output.object({ schema: vibeScoreSchema }),
       messages: [
         {
           role: "user",
           content: [
-            { type: "text", text: `Bu dump'ı 1-10 arası puanla.\n\nÖzet:\n${body.summary}` },
+            { type: "text", text: scorePrompt(body.lang, body.summary) },
             ...images.map((url) => ({ type: "image" as const, image: url })),
           ],
         },
