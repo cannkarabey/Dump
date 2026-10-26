@@ -348,7 +348,7 @@ Koordinatlar 0–1 normalize → her boyuta (4:5, 3:4, 9:16) yeniden ölçeklene
 | AI | Vercel AI SDK (`ai`, `@ai-sdk/google`, `@ai-sdk/react`) + Gemini (`gemini-3.1-flash-lite`, `gemini-3.8-flash`) | Bölüm 3 |
 | Auth & veri | Supabase (Google girişi, `dumps`, `subscriptions`, `ai_usage` tabloları) | Sprint 2 |
 | Analytics | Umami veya Plausible | Çerezsiz, KVKK dostu |
-| Deploy | Vercel | Next.js ile sıfır ayar |
+| Deploy | **Ertelendi** (Vercel / Netlify / Cloudflare arasında maliyet netleşince seçilecek) | Kod sağlayıcıdan bağımsız tutulur: Vercel'e özel paket yok, sunucu tarafı servisler Upstash + Supabase |
 
 ### Klasör yapısı
 ```
@@ -655,7 +655,7 @@ export interface Asset {
   | HEIC (iPhone) | Safari açar; Chrome açamazsa anlaşılır hata mesajı (dönüştürme sonraki sürüme) |
   | Safari + Chrome, 4K export, 10 sayfa | Hata yok, dosyalar 2880×3840 |
   | Undo/redo 20 adım, ay dump'ı → ⌘Z | Tek adımda geri alınıyor |
-- `npm run build` → GitHub'a push → Vercel'de "Import Project" → otomatik deploy.
+- `npm run build` → GitHub'a push. Deploy, hosting kararı verilene kadar ertelendi (26.10.2026).
 - **Commit:** `feat: export engine, text & stickers, polish` → tag `v0.1.0`
 
 **Sprint 1 — Tanım gereği bitti:** Yayındaki URL'de kullanıcı foto yükleyip şablon/ay dump'ı ile carousel oluşturup PNG/ZIP indirebiliyor; tier kısıtları (mock) çalışıyor.

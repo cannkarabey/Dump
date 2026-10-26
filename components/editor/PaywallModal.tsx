@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Crown } from "@/components/ui/Crown";
 import { useUi } from "@/lib/store/ui";
 import { useTier } from "@/lib/store/tier";
-import { TIER_LABELS, TIER_LIMITS, TIER_PRICES, type Feature } from "@/lib/tiers";
+import { TIER_LABELS, TIER_PRICES, tierFeatures, type Feature } from "@/lib/tiers";
 import type { Tier } from "@/lib/types";
 import { cn } from "@/lib/cn";
 
@@ -21,20 +21,6 @@ const REASONS: Record<PaywallReason, string> = {
   hiRes: "2K / 4K dışa aktarma",
   brandKit: "Marka kiti ve özel fontlar",
 };
-
-function features(tier: Tier): string[] {
-  const l = TIER_LIMITS[tier];
-  return [
-    Number.isFinite(l.maxPhotos) ? `Dump başına ${l.maxPhotos} fotoğraf` : "Sınırsız fotoğraf",
-    `${l.maxPages} sayfaya kadar carousel`,
-    l.templates === "all" ? "Tüm şablonlar" : "Ücretsiz şablonlar",
-    `Uzun kenar ${l.exportLongSide}px export`,
-    l.watermark ? "Küçük filigran" : "Filigransız",
-    ...(l.zip ? ["ZIP ile toplu indirme"] : []),
-    ...(l.stamp ? ["Retro tarih damgası"] : []),
-    ...(l.brandKit ? ["Marka kiti & özel fontlar"] : []),
-  ];
-}
 
 export function PaywallModal() {
   const { open, feature } = useUi((s) => s.modals.paywall);
@@ -78,7 +64,7 @@ export function PaywallModal() {
                 </p>
               </div>
               <ul className="flex flex-1 flex-col gap-2 text-sm">
-                {features(tier).map((f) => (
+                {tierFeatures(tier).map((f) => (
                   <li key={f} className="flex gap-2">
                     <Check size={16} className="mt-0.5 shrink-0 text-accent" />
                     {f}

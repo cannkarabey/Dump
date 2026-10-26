@@ -65,3 +65,18 @@ export const TIER_PRICES: Record<Tier, { monthly: number; yearly: number }> = {
   creator: { monthly: 5, yearly: 42 },
   studio: { monthly: 10, yearly: 84 },
 };
+
+/** Human-readable feature list per tier; shared by the paywall and the pricing section. */
+export function tierFeatures(tier: Tier): string[] {
+  const l = TIER_LIMITS[tier];
+  return [
+    Number.isFinite(l.maxPhotos) ? `Dump başına ${l.maxPhotos} fotoğraf` : "Sınırsız fotoğraf",
+    `${l.maxPages} sayfaya kadar carousel`,
+    l.templates === "all" ? "Tüm şablonlar" : "Ücretsiz şablonlar",
+    `Uzun kenar ${l.exportLongSide}px export`,
+    l.watermark ? "Küçük filigran" : "Filigransız",
+    ...(l.zip ? ["ZIP ile toplu indirme"] : []),
+    ...(l.stamp ? ["Retro tarih damgası"] : []),
+    ...(l.brandKit ? ["Marka kiti & özel fontlar"] : []),
+  ];
+}
