@@ -1,0 +1,93 @@
+{
+ "id": "scrapbook",
+ "title": "Karalama Defteri",
+ "tier": "creator",
+ "mode": "single",
+ "pages": 1,
+ "background": "#f3ece2",
+ "tags": [
+  "scrapbook",
+  "polaroid",
+  "warm"
+ ],
+ "elements": [
+  {
+   "type": "shape",
+   "page": 0,
+   "nx": 0.08,
+   "ny": 0.04,
+   "nw": 0.3,
+   "nh": 0.05,
+   "fill": "#a8e6cf",
+   "rotation": -6
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.07,
+   "nw": 0.5,
+   "nh": 0.42,
+   "rotation": -5,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.46,
+   "ny": 0.2,
+   "nw": 0.46,
+   "nh": 0.4,
+   "rotation": 6,
+   "frame": "polaroid"
+  },
+  {
+   "type": "shape",
+   "page": 0,
+   "nx": 0.62,
+   "ny": 0.18,
+   "nw": 0.22,
+   "nh": 0.045,
+   "fill": "#ffd3b6",
+   "rotation": 8
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.1,
+   "ny": 0.54,
+   "nw": 0.44,
+   "nh": 0.38,
+   "rotation": 4,
+   "frame": "polaroid"
+  },
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.5,
+   "ny": 0.68,
+   "nw": 0.45,
+   "nh": 0.1,
+   "text": "bu ay\nçok güzeldi",
+   "font": "caveat",
+   "nfs": 0.055,
+   "fill": "#3b3b3b",
+   "align": "center"
+  },
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.52,
+   "ny": 0.86,
+   "nw": 0.4,
+   "nh": 0.06,
+   "text": "#photodump",
+   "font": "inter",
+   "nfs": 0.025,
+   "fill": "#1d1d1f",
+   "align": "center",
+   "fontStyle": "600",
+   "bubble": true
+  }
+ ]
+}

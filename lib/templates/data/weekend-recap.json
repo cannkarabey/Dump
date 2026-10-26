@@ -1,0 +1,96 @@
+{
+ "id": "weekend-recap",
+ "title": "Hafta Sonu Özeti",
+ "tier": "free",
+ "mode": "carousel",
+ "pages": 3,
+ "background": "#fff4e6",
+ "tags": [
+  "weekend",
+  "title",
+  "warm"
+ ],
+ "elements": [
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.06,
+   "nw": 0.88,
+   "nh": 0.2,
+   "text": "hafta\nsonu",
+   "font": "playfair",
+   "nfs": 0.1,
+   "fill": "#1d1d1f",
+   "align": "left",
+   "fontStyle": "bold"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.34,
+   "nw": 0.88,
+   "nh": 0.6,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.06,
+   "ny": 0.05,
+   "nw": 0.43,
+   "nh": 0.44,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.51,
+   "ny": 0.05,
+   "nw": 0.43,
+   "nh": 0.44,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.06,
+   "ny": 0.51,
+   "nw": 0.43,
+   "nh": 0.44,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.51,
+   "ny": 0.51,
+   "nw": 0.43,
+   "nh": 0.44,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.06,
+   "ny": 0.05,
+   "nw": 0.88,
+   "nh": 0.62,
+   "nradius": 0.02
+  },
+  {
+   "type": "text",
+   "page": 2,
+   "nx": 0.06,
+   "ny": 0.72,
+   "nw": 0.88,
+   "nh": 0.1,
+   "text": "tekrar ne zaman?",
+   "font": "caveat",
+   "nfs": 0.06,
+   "fill": "#ff7a59",
+   "align": "center"
+  }
+ ]
+}

@@ -1,0 +1,87 @@
+{
+ "id": "chat-labels",
+ "title": "Etiketli Kareler",
+ "tier": "free",
+ "mode": "carousel",
+ "pages": 2,
+ "background": "#ffffff",
+ "tags": [
+  "labels",
+  "bubble",
+  "fun"
+ ],
+ "elements": [
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.05,
+   "ny": 0.05,
+   "nw": 0.9,
+   "nh": 0.43,
+   "nradius": 0.02
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.05,
+   "ny": 0.52,
+   "nw": 0.9,
+   "nh": 0.43,
+   "nradius": 0.02
+  },
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.08,
+   "ny": 0.4,
+   "nw": 0.4,
+   "nh": 0.06,
+   "text": "fav drink",
+   "font": "inter",
+   "nfs": 0.026,
+   "fill": "#1d1d1f",
+   "align": "left",
+   "fontStyle": "600",
+   "bubble": true
+  },
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.5,
+   "ny": 0.87,
+   "nw": 0.42,
+   "nh": 0.06,
+   "text": "great view!",
+   "font": "inter",
+   "nfs": 0.026,
+   "fill": "#1d1d1f",
+   "align": "right",
+   "fontStyle": "600",
+   "bubble": true
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.05,
+   "ny": 0.05,
+   "nw": 0.9,
+   "nh": 0.9,
+   "nradius": 0.02
+  },
+  {
+   "type": "text",
+   "page": 1,
+   "nx": 0.1,
+   "ny": 0.82,
+   "nw": 0.5,
+   "nh": 0.06,
+   "text": "love the vibe",
+   "font": "inter",
+   "nfs": 0.026,
+   "fill": "#1d1d1f",
+   "align": "left",
+   "fontStyle": "600",
+   "bubble": true
+  }
+ ]
+}

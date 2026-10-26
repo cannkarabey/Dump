@@ -24,16 +24,23 @@ export function exportPixelRatio(doc: DumpDoc, longSide: number) {
   return Math.max(1, longSide / Math.max(doc.format.w, doc.format.h));
 }
 
-/** Renders each requested page of the editor stage to a Blob, then restores the editor view. */
-export async function exportPages(stage: Konva.Stage, doc: DumpDoc, opts: ExportOptions): Promise<Blob[]> {
+/**
+ * Renders one page synchronously: switch the stage to an unscaled export view, draw, and restore
+ * before returning, so the editor never paints the temporary view (no flicker, even mid-edit).
+ */
+function renderPageCanvas(
+  stage: Konva.Stage,
+  doc: DumpDoc,
+  page: number,
+  opts: { pixelRatio: number; mime: ExportMime; watermark: boolean },
+): HTMLCanvasElement {
   const { w, h } = doc.format;
-  const pixelRatio = exportPixelRatio(doc, opts.longSide);
   const saved = { scale: stage.scale(), position: stage.position() };
   const ui = stage.findOne<Konva.Layer>(".ui");
   const content = stage.findOne<Konva.Layer>(".content");
   const artboard = stage.findOne<Konva.Rect>(".artboard");
   const artboardFill = artboard?.fill();
-  const temp: Konva.Node[] = [];
+  let mark: Konva.Label | null = null;
 
   try {
     stage.scale({ x: 1, y: 1 });
@@ -44,54 +51,57 @@ export async function exportPages(stage: Konva.Stage, doc: DumpDoc, opts: Export
       artboard.fill(opts.mime === "image/png" ? "" : "#ffffff");
     }
     if (opts.watermark && content) {
-      for (const page of opts.pages) {
-        // Dark pill so the mark stays legible on both light and dark backgrounds.
-        const fontSize = h * 0.018;
-        const mark = new Konva.Label({ opacity: 0.85, listening: false });
-        mark.add(new Konva.Tag({ fill: "#000000", opacity: 0.45, cornerRadius: fontSize }));
-        mark.add(
-          new Konva.Text({
-            text: "made with dump",
-            fontFamily: fontFamilyFor("space"),
-            fontStyle: "600",
-            fontSize,
-            fill: "#ffffff",
-            padding: fontSize * 0.5,
-          }),
-        );
-        mark.position({
-          x: page * w + w - mark.width() - w * 0.03,
-          y: h - mark.height() - h * 0.02,
-        });
-        content.add(mark);
-        temp.push(mark);
-      }
-    }
-
-    const blobs: Blob[] = [];
-    for (const [i, page] of opts.pages.entries()) {
-      blobs.push(
-        await stage.toBlob({
-          x: page * w,
-          y: 0,
-          width: w,
-          height: h,
-          pixelRatio,
-          mimeType: opts.mime,
-          quality: 0.92,
+      // Dark pill so the mark stays legible on both light and dark backgrounds.
+      const fontSize = h * 0.018;
+      mark = new Konva.Label({ opacity: 0.85, listening: false });
+      mark.add(new Konva.Tag({ fill: "#000000", opacity: 0.45, cornerRadius: fontSize }));
+      mark.add(
+        new Konva.Text({
+          text: "made with dump",
+          fontFamily: fontFamilyFor("space"),
+          fontStyle: "600",
+          fontSize,
+          fill: "#ffffff",
+          padding: fontSize * 0.5,
         }),
       );
-      opts.onProgress?.(i + 1, opts.pages.length);
+      mark.position({ x: page * w + w - mark.width() - w * 0.03, y: h - mark.height() - h * 0.02 });
+      content.add(mark);
     }
-    return blobs;
+    return stage.toCanvas({ x: page * w, y: 0, width: w, height: h, pixelRatio: opts.pixelRatio });
   } finally {
-    temp.forEach((n) => n.destroy());
+    mark?.destroy();
     if (artboard) artboard.fill(artboardFill ?? "#ffffff");
     ui?.show();
     stage.scale(saved.scale);
     stage.position(saved.position);
     stage.batchDraw();
   }
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, mime: ExportMime, quality = 0.92) {
+  return new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Canvas encoding failed"))), mime, quality),
+  );
+}
+
+/** Renders each requested page to a Blob, one page in memory at a time. */
+export async function exportPages(stage: Konva.Stage, doc: DumpDoc, opts: ExportOptions): Promise<Blob[]> {
+  const pixelRatio = exportPixelRatio(doc, opts.longSide);
+  const blobs: Blob[] = [];
+  for (const [i, page] of opts.pages.entries()) {
+    const canvas = renderPageCanvas(stage, doc, page, { pixelRatio, mime: opts.mime, watermark: opts.watermark });
+    blobs.push(await canvasToBlob(canvas, opts.mime));
+    opts.onProgress?.(i + 1, opts.pages.length);
+  }
+  return blobs;
+}
+
+/** Small JPEG data URL of the first page, for the dashboard. */
+export function renderThumbnail(stage: Konva.Stage, doc: DumpDoc, longSide = 360): string {
+  const pixelRatio = longSide / Math.max(doc.format.w, doc.format.h);
+  const canvas = renderPageCanvas(stage, doc, 0, { pixelRatio, mime: "image/jpeg", watermark: false });
+  return canvas.toDataURL("image/jpeg", 0.75);
 }
 
 function slug(title: string) {

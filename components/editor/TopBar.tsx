@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Cloud, Download, Minus, Plus, Redo2, Sparkles, Undo2 } from "lucide-react";
+import { Cloud, CloudCheck, CloudOff, Download, FileJson, Loader2, Minus, Plus, Redo2, Sparkles, Undo2 } from "lucide-react";
+import { saveAs } from "file-saver";
 import { runMonthDump } from "@/lib/runMonthDump";
+import { templateFromDoc } from "@/lib/templates/fromDoc";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { Tooltip } from "@/components/ui/Tooltip";
@@ -28,7 +30,7 @@ export function TopBar() {
 
   return (
     <header className="col-span-4 flex items-center gap-3 px-2">
-      <Link href="/" className="flex items-center gap-2 pr-2" aria-label="Ana sayfa">
+      <Link href="/app" className="flex items-center gap-2 pr-2" aria-label="Dump'larım">
         <Logo />
         <span className="font-display text-lg font-bold tracking-tight">dump</span>
       </Link>
@@ -42,11 +44,7 @@ export function TopBar() {
         aria-label="Dump adı"
         className="h-8 w-44 rounded-lg bg-transparent px-2 text-sm font-medium outline-none hover:bg-hover focus:bg-hover"
       />
-      <Tooltip content="Bu cihazda kaydedildi">
-        <span className="text-muted">
-          <Cloud size={16} />
-        </span>
-      </Tooltip>
+      <SaveIndicator />
 
       <div className="mx-auto flex items-center gap-1">
         <Tooltip content="Geri al (⌘Z)">
@@ -85,6 +83,7 @@ export function TopBar() {
           Ayın Dump&apos;ı
         </Button>
       </Tooltip>
+      {DEV && <DevTemplateExport />}
       {DEV && <DevTierToggle />}
       <span
         className={cn(
@@ -99,6 +98,43 @@ export function TopBar() {
         Dışa aktar
       </Button>
     </header>
+  );
+}
+
+const SAVE_LABELS = {
+  idle: "Değişiklikler bu cihazda otomatik kaydedilir",
+  saving: "Kaydediliyor…",
+  saved: "Bu cihazda kaydedildi",
+  error: "Kaydedilemedi — tarayıcı depolaması dolu ya da kapalı olabilir",
+} as const;
+
+function SaveIndicator() {
+  const state = useUi((s) => s.saveState);
+  const Icon = state === "saving" ? Loader2 : state === "error" ? CloudOff : state === "saved" ? CloudCheck : Cloud;
+  return (
+    <Tooltip content={SAVE_LABELS[state]}>
+      <span role="status" aria-label={SAVE_LABELS[state]} className={cn("text-muted", state === "error" && "text-[#ff453a]")}>
+        <Icon size={16} className={state === "saving" ? "animate-spin" : undefined} />
+      </span>
+    </Tooltip>
+  );
+}
+
+/** Dev-only: download the open doc as a template JSON for lib/templates/data. */
+function DevTemplateExport() {
+  return (
+    <Tooltip content="Şablon olarak dışa aktar (dev)">
+      <IconButton
+        label="Şablon olarak dışa aktar"
+        size="sm"
+        onClick={() => {
+          const t = templateFromDoc(useDoc.getState().doc);
+          saveAs(new Blob([JSON.stringify(t, null, 1)], { type: "application/json" }), `${t.id}.json`);
+        }}
+      >
+        <FileJson size={15} />
+      </IconButton>
+    </Tooltip>
   );
 }
 

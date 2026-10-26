@@ -1,0 +1,96 @@
+{
+ "id": "grid-3x3",
+ "title": "3×3 Mozaik",
+ "tier": "free",
+ "mode": "single",
+ "pages": 1,
+ "background": "#ffffff",
+ "tags": [
+  "grid",
+  "mosaic",
+  "minimal"
+ ],
+ "elements": [
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.04,
+   "ny": 0.04,
+   "nw": 0.3,
+   "nh": 0.3,
+   "nradius": 0.01
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.35,
+   "ny": 0.04,
+   "nw": 0.3,
+   "nh": 0.3,
+   "nradius": 0.01
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.66,
+   "ny": 0.04,
+   "nw": 0.3,
+   "nh": 0.3,
+   "nradius": 0.01
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.04,
+   "ny": 0.35,
+   "nw": 0.3,
+   "nh": 0.3,
+   "nradius": 0.01
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.35,
+   "ny": 0.35,
+   "nw": 0.3,
+   "nh": 0.3,
+   "nradius": 0.01
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.66,
+   "ny": 0.35,
+   "nw": 0.3,
+   "nh": 0.3,
+   "nradius": 0.01
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.04,
+   "ny": 0.66,
+   "nw": 0.3,
+   "nh": 0.3,
+   "nradius": 0.01
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.35,
+   "ny": 0.66,
+   "nw": 0.3,
+   "nh": 0.3,
+   "nradius": 0.01
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.66,
+   "ny": 0.66,
+   "nw": 0.3,
+   "nh": 0.3,
+   "nradius": 0.01
+  }
+ ]
+}

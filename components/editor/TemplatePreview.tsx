@@ -3,8 +3,12 @@ import type { Template } from "@/lib/templates/schema";
 const W = 30;
 const H = 40;
 
+/** Stand-in "photo" colors for gallery previews until licensed sample shots are added. */
+const PHOTO_FILLS = ["#ff8a7a", "#7ea6ff", "#6fcf97", "#ffb65c", "#b49bff", "#ff7eb6", "#5c6b9c", "#e6c9a8"];
+
 /** Lightweight SVG thumbnail drawn from the template's own geometry (no preview images needed). */
-export function TemplatePreview({ t }: { t: Template }) {
+export function TemplatePreview({ t, colorful = false }: { t: Template; colorful?: boolean }) {
+  let slotIndex = 0;
   const pages = t.mode === "single" ? 1 : t.pages;
   const dark = isDark(t.background);
   const slotFill = dark ? "#ffffff38" : "#7c5cff33";
@@ -37,7 +41,7 @@ export function TemplatePreview({ t }: { t: Template }) {
                 width={w * (e.frame === "polaroid" ? 0.88 : e.frame === "film" ? 0.92 : 1)}
                 height={h * (e.frame === "polaroid" ? 0.72 : e.frame === "film" ? 0.72 : 1)}
                 rx={e.frame ? 0 : 0.8}
-                fill={slotFill}
+                fill={colorful ? PHOTO_FILLS[slotIndex++ % PHOTO_FILLS.length] : slotFill}
               />
             </g>
           );

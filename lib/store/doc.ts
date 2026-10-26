@@ -26,6 +26,8 @@ interface DocState {
   doc: DumpDoc;
   /** Replaces the doc and clears undo history (new or loaded dump). */
   newDoc: (format: DumpFormat, id?: string) => DumpDoc;
+  /** Loads a saved dump (or a template start) with a fresh undo history. */
+  loadDoc: (doc: DumpDoc) => void;
   /** Replaces the doc as a single undoable step (templates, month dump). */
   replaceDoc: (doc: DumpDoc) => void;
   setTitle: (title: string) => void;
@@ -72,6 +74,10 @@ export const useDoc = create<DocState>()(
           set({ doc });
           useDoc.temporal.getState().clear();
           return doc;
+        },
+        loadDoc: (doc) => {
+          set({ doc });
+          useDoc.temporal.getState().clear();
         },
         replaceDoc: (doc) => commit(() => doc),
         setTitle: (title) => commit((d) => (d.title === title ? d : { ...d, title })),

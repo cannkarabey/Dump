@@ -13,6 +13,9 @@ interface UiState {
   activePage: number;
   /** Shown as a small toast at the bottom of the canvas. */
   notice: string | null;
+  /** Autosave status for the TopBar cloud indicator. */
+  saveState: "idle" | "saving" | "saved" | "error";
+  setSaveState: (state: UiState["saveState"]) => void;
   /** Id of the text element being edited inline on the canvas. */
   editingText: string | null;
   setEditingText: (id: string | null) => void;
@@ -46,6 +49,8 @@ export const useUi = create<UiState>((set) => ({
   selection: [],
   activePage: 0,
   notice: null,
+  saveState: "idle",
+  setSaveState: (saveState) => set({ saveState }),
   editingText: null,
   setEditingText: (editingText) => set({ editingText }),
   fitRequest: 0,

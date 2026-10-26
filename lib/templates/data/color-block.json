@@ -1,0 +1,77 @@
+{
+ "id": "color-block",
+ "title": "Renk Blokları",
+ "tier": "free",
+ "mode": "single",
+ "pages": 1,
+ "background": "#ffffff",
+ "tags": [
+  "bold",
+  "color",
+  "minimal"
+ ],
+ "elements": [
+  {
+   "type": "shape",
+   "page": 0,
+   "nx": 0,
+   "ny": 0,
+   "nw": 0.5,
+   "nh": 0.5,
+   "fill": "#ffd23f"
+  },
+  {
+   "type": "shape",
+   "page": 0,
+   "nx": 0.5,
+   "ny": 0.5,
+   "nw": 0.5,
+   "nh": 0.5,
+   "fill": "#7c5cff"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.5,
+   "ny": 0,
+   "nw": 0.5,
+   "nh": 0.5
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0,
+   "ny": 0.5,
+   "nw": 0.5,
+   "nh": 0.5
+  },
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.04,
+   "ny": 0.04,
+   "nw": 0.42,
+   "nh": 0.1,
+   "text": "01",
+   "font": "space",
+   "nfs": 0.08,
+   "fill": "#1d1d1f",
+   "align": "left",
+   "fontStyle": "bold"
+  },
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.54,
+   "ny": 0.86,
+   "nw": 0.42,
+   "nh": 0.1,
+   "text": "02",
+   "font": "space",
+   "nfs": 0.08,
+   "fill": "#ffffff",
+   "align": "right",
+   "fontStyle": "bold"
+  }
+ ]
+}

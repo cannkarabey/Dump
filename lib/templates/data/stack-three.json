@@ -1,0 +1,42 @@
+{
+ "id": "stack-three",
+ "title": "Üçlü Şerit",
+ "tier": "free",
+ "mode": "single",
+ "pages": 1,
+ "background": "#111111",
+ "tags": [
+  "dark",
+  "stack",
+  "clean"
+ ],
+ "elements": [
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.05,
+   "nw": 0.88,
+   "nh": 0.28,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.36,
+   "nw": 0.88,
+   "nh": 0.28,
+   "nradius": 0.015
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.67,
+   "nw": 0.88,
+   "nh": 0.28,
+   "nradius": 0.015
+  }
+ ]
+}

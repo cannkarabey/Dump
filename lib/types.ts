@@ -89,8 +89,10 @@ export interface DumpDoc {
 /** Heavy, non-undoable data kept outside the doc. */
 export interface Asset {
   id: string;
-  /** objectURL of the downscaled blob. */
+  /** objectURL of `blob`. */
   url: string;
+  /** Downscaled image; this is what gets persisted. */
+  blob: Blob;
   img: HTMLImageElement;
   w: number;
   h: number;

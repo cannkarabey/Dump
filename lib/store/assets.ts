@@ -8,6 +8,8 @@ interface AssetsState {
   order: string[];
   addFiles: (files: File[]) => Promise<{ added: Asset[]; failed: string[] }>;
   removeAsset: (id: string) => void;
+  /** Swaps in another dump's assets (on load), releasing the current object URLs. */
+  replaceAll: (assets: Asset[]) => void;
 }
 
 export const useAssets = create<AssetsState>((set) => ({
@@ -30,6 +32,13 @@ export const useAssets = create<AssetsState>((set) => ({
     }
     return { added, failed };
   },
+
+  replaceAll: (list) =>
+    set((s) => {
+      const keep = new Set(list.map((a) => a.id));
+      for (const a of Object.values(s.assets)) if (!keep.has(a.id)) URL.revokeObjectURL(a.url);
+      return { assets: Object.fromEntries(list.map((a) => [a.id, a])), order: list.map((a) => a.id) };
+    }),
 
   removeAsset: (id) =>
     set((s) => {

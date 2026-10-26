@@ -1,0 +1,135 @@
+{
+ "id": "polaroid-wall",
+ "title": "Polaroid Duvarı",
+ "tier": "creator",
+ "mode": "carousel",
+ "pages": 3,
+ "background": "#e9e4dc",
+ "tags": [
+  "polaroid",
+  "wall",
+  "seamless"
+ ],
+ "elements": [
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.06,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": -4,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.53,
+   "ny": 0.06,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": 3,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.52,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": 5,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.53,
+   "ny": 0.52,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": -3,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.06,
+   "ny": 0.06,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": 3,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.53,
+   "ny": 0.06,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": 5,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.06,
+   "ny": 0.52,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": -3,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.53,
+   "ny": 0.52,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": -4,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.06,
+   "ny": 0.06,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": 5,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.53,
+   "ny": 0.06,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": -3,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.06,
+   "ny": 0.52,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": -4,
+   "frame": "polaroid"
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.53,
+   "ny": 0.52,
+   "nw": 0.42,
+   "nh": 0.42,
+   "rotation": 3,
+   "frame": "polaroid"
+  }
+ ]
+}

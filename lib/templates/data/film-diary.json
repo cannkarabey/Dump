@@ -1,0 +1,74 @@
+{
+ "id": "film-diary",
+ "title": "Film Günlüğü",
+ "tier": "creator",
+ "mode": "carousel",
+ "pages": 4,
+ "background": "#1a1a1a",
+ "tags": [
+  "film",
+  "dark",
+  "retro",
+  "seamless"
+ ],
+ "elements": [
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.08,
+   "ny": 0.08,
+   "nw": 0.84,
+   "nh": 0.12,
+   "text": "EKİM\nGÜNLÜĞÜ",
+   "font": "vt323",
+   "nfs": 0.08,
+   "fill": "#ffa41f",
+   "align": "left"
+  },
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.08,
+   "ny": 0.36,
+   "nw": 1.6,
+   "nh": 0.5,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 1,
+   "nx": 0.75,
+   "ny": 0.1,
+   "nw": 0.9,
+   "nh": 0.32,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 2,
+   "nx": 0.1,
+   "ny": 0.5,
+   "nw": 0.8,
+   "nh": 0.42,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 3,
+   "nx": 0.1,
+   "ny": 0.08,
+   "nw": 0.8,
+   "nh": 0.42,
+   "frame": "film"
+  },
+  {
+   "type": "slot",
+   "page": 3,
+   "nx": 0.1,
+   "ny": 0.54,
+   "nw": 0.8,
+   "nh": 0.38,
+   "frame": "film"
+  }
+ ]
+}

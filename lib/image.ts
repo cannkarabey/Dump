@@ -78,6 +78,7 @@ export async function fileToAsset(file: File): Promise<Asset> {
   return {
     id: nanoid(10),
     url,
+    blob,
     img,
     w,
     h,
@@ -85,4 +86,13 @@ export async function fileToAsset(file: File): Promise<Asset> {
     dominant,
     fileName: file.name,
   };
+}
+
+/** Rebuilds an in-memory Asset from persisted metadata and its stored blob. */
+export async function assetFromStored(meta: Omit<Asset, "url" | "img" | "blob">, blob: Blob): Promise<Asset> {
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  return { ...meta, url, img, blob };
 }

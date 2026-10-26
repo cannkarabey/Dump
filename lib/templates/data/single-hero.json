@@ -1,0 +1,51 @@
+{
+ "id": "single-hero",
+ "title": "Tek Kare",
+ "tier": "free",
+ "mode": "single",
+ "pages": 1,
+ "background": "#fafafa",
+ "tags": [
+  "minimal",
+  "single",
+  "clean"
+ ],
+ "elements": [
+  {
+   "type": "slot",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.06,
+   "nw": 0.88,
+   "nh": 0.76,
+   "nradius": 0.02
+  },
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.86,
+   "nw": 0.88,
+   "nh": 0.06,
+   "text": "{{month}}",
+   "font": "space",
+   "nfs": 0.035,
+   "fill": "#1d1d1f",
+   "align": "left",
+   "fontStyle": "600"
+  },
+  {
+   "type": "text",
+   "page": 0,
+   "nx": 0.06,
+   "ny": 0.91,
+   "nw": 0.88,
+   "nh": 0.05,
+   "text": "a little photo dump",
+   "font": "inter",
+   "nfs": 0.025,
+   "fill": "#86868b",
+   "align": "left"
+  }
+ ]
+}
