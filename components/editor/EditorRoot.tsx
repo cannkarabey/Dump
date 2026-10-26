@@ -13,6 +13,7 @@ import { CanvasArea } from "./CanvasArea";
 import { RightPanel } from "./RightPanel";
 import { NewDumpModal } from "./NewDumpModal";
 import { PaywallModal } from "./PaywallModal";
+import { ExportDialog } from "./ExportDialog";
 
 export function EditorRoot({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -42,6 +43,7 @@ export function EditorRoot({ params }: { params: Promise<{ id: string }> }) {
       </div>
       <NewDumpModal />
       <PaywallModal />
+      <ExportDialog />
     </TooltipProvider>
   );
 }

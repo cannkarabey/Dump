@@ -13,6 +13,8 @@ import { loadEditorFonts } from "@/lib/fonts";
 import { PhotoNode } from "./PhotoNode";
 import { TextNode } from "./TextNode";
 import { ShapeNode } from "./ShapeNode";
+import { StickerNode } from "./StickerNode";
+import { InlineTextEditor } from "./InlineTextEditor";
 import { SelectionTransformer } from "./SelectionTransformer";
 import type { El } from "@/lib/types";
 
@@ -25,6 +27,7 @@ function isTyping(target: EventTarget | null) {
 
 export default function CanvasStage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const ownStage = useRef<Konva.Stage | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [spaceDown, setSpaceDown] = useState(false);
@@ -32,6 +35,8 @@ export default function CanvasStage() {
   const doc = useDoc((s) => s.doc);
   const zoom = useUi((s) => s.zoom);
   const selection = useUi((s) => s.selection);
+  const editingId = useUi((s) => s.editingText);
+  const editingEl = doc.elements.find((el) => el.id === editingId && el.type === "text");
   const { w, h, pages, mode } = doc.format;
   const totalW = w * pages;
 
@@ -184,7 +189,14 @@ export default function CanvasStage() {
       {size.width > 0 && (
         <Stage
           ref={(s) => {
-            stageRef.current = s;
+            // Next keeps previous routes mounted but hidden; a hidden editor detaching its
+            // stage must not clear the visible one's.
+            if (s) {
+              ownStage.current = s;
+              stageRef.current = s;
+            } else if (stageRef.current === ownStage.current) {
+              stageRef.current = null;
+            }
           }}
           width={size.width}
           height={size.height}
@@ -255,6 +267,7 @@ export default function CanvasStage() {
           </Layer>
         </Stage>
       )}
+      {editingEl?.type === "text" && <InlineTextEditor key={editingEl.id} el={editingEl} zoom={zoom} pan={pan} />}
     </div>
   );
 }
@@ -268,8 +281,7 @@ function ElementNode({ el, single, draggable }: { el: El; single: boolean; dragg
       return <TextNode el={el} draggable={draggable} />;
     case "shape":
       return <ShapeNode el={el} draggable={draggable} />;
-    // Stickers render once the sticker panel lands in S1.13.
-    default:
-      return null;
+    case "sticker":
+      return <StickerNode el={el} draggable={draggable} />;
   }
 }

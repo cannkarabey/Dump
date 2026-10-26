@@ -3,15 +3,16 @@
 import { useUi, type LeftPanel } from "@/lib/store/ui";
 import { RAIL_ITEMS } from "./LeftRail";
 import { UploadPanel } from "./panels/UploadPanel";
-import { PlaceholderPanel } from "./panels/PlaceholderPanel";
+import { TextPanel } from "./panels/TextPanel";
+import { StickersPanel } from "./panels/StickersPanel";
 import { TemplatesPanel } from "./panels/TemplatesPanel";
 import { LayersPanel } from "./panels/LayersPanel";
 
 const PANELS: Record<LeftPanel, () => React.ReactNode> = {
   upload: () => <UploadPanel />,
   templates: () => <TemplatesPanel />,
-  text: () => <PlaceholderPanel task="S1.13" text="Metin stilleri burada olacak." />,
-  stickers: () => <PlaceholderPanel task="S1.13" text="Sticker'lar burada olacak." />,
+  text: () => <TextPanel />,
+  stickers: () => <StickersPanel />,
   layers: () => <LayersPanel />,
 };
 

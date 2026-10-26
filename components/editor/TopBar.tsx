@@ -94,7 +94,7 @@ export function TopBar() {
       >
         {TIER_LABELS[tier]}
       </span>
-      <Button variant="accent" size="sm" disabled title="Export S1.12'de geliyor">
+      <Button variant="accent" size="sm" onClick={() => useUi.getState().openModal("export")}>
         <Download size={15} />
         Dışa aktar
       </Button>

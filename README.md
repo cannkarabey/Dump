@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dump Creator
 
-## Getting Started
+Tarayıcıda çalışan photo dump / Instagram carousel / TikTok slideshow editörü. Fotoğraflar cihazdan çıkmadan işlenir; canvas'ta düzenlenip PNG/JPG ya da ZIP olarak dışa aktarılır.
 
-First, run the development server:
+Ürün ve uygulama planı: [PLAN.md](PLAN.md).
+
+## Geliştirme
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Editör: http://localhost:3000/app/editor/new
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Geliştirme modunda üst barda bir **dev tier** seçici var (Free / Creator / Studio); ödeme bağlanana kadar plan kısıtlarını denemek için.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+## Yapı
 
-To learn more about Next.js, take a look at the following resources:
+- `app/` — rotalar (`/app/editor/[id]` editör, `/dev/ui` bileşen galerisi)
+- `components/editor/` — editör arayüzü; `canvas/` react-konva düğümleri, `panels/` sol paneller, `properties/` sağ panel
+- `lib/store/` — Zustand store'ları (`doc` undo/redo'lu belge, `assets`, `ui`, `tier`)
+- `lib/templates/` — normalize şablon şeması, `applyTemplate`, şablon JSON'ları
+- `lib/export.ts` — sayfa sayfa PNG/JPG ve ZIP export
+- `lib/monthDump.ts` — "Ayın Dump'ı" (EXIF sırası, kapak, palet, tarih damgası)
+- `public/stickers/` — projeye özel çizilmiş SVG sticker'lar
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Yayına alma (Vercel)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. https://vercel.com → **Add New → Project** → GitHub'dan `Dump` reposunu seç.
+2. Framework otomatik olarak Next.js algılanır; ayar değiştirmeden **Deploy**.
+3. Sonraki her `git push` otomatik deploy olur.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Sprint 1'de ortam değişkeni gerekmez. Sprint 2'de eklenecekler PLAN.md bölüm 7.0'da.

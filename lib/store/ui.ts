@@ -13,6 +13,9 @@ interface UiState {
   activePage: number;
   /** Shown as a small toast at the bottom of the canvas. */
   notice: string | null;
+  /** Id of the text element being edited inline on the canvas. */
+  editingText: string | null;
+  setEditingText: (id: string | null) => void;
   /** Incremented to ask the canvas to fit the artboard to the viewport. */
   fitRequest: number;
   requestFit: () => void;
@@ -43,6 +46,8 @@ export const useUi = create<UiState>((set) => ({
   selection: [],
   activePage: 0,
   notice: null,
+  editingText: null,
+  setEditingText: (editingText) => set({ editingText }),
   fitRequest: 0,
   requestFit: () => set((s) => ({ fitRequest: s.fitRequest + 1 })),
   modals: { newDump: false, export: false, paywall: { open: false } },
