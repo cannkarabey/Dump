@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageIcon, Lock, Square, Sticker, Type, type LucideIcon } from "lucide-react";
+import { ImageIcon, Lock, PenLine, Square, Sticker, Type, type LucideIcon } from "lucide-react";
 import { useDoc, pageOf } from "@/lib/store/doc";
 import { useAssets } from "@/lib/store/assets";
 import { useUi } from "@/lib/store/ui";
@@ -15,6 +15,7 @@ const ICONS: Record<El["type"], LucideIcon> = {
   text: Type,
   sticker: Sticker,
   shape: Square,
+  draw: PenLine,
 };
 
 function label(el: El, l: AppDict["layers"], fileName?: string) {
@@ -26,7 +27,9 @@ function label(el: El, l: AppDict["layers"], fileName?: string) {
     case "slot":
       return el.assetId ? (fileName ?? l.slot) : l.emptySlot;
     case "sticker":
-      return l.sticker;
+      return el.widget ? l.widget : l.sticker;
+    case "draw":
+      return l.drawing;
     case "shape":
       return l.shape;
   }

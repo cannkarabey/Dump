@@ -31,7 +31,7 @@ export function placeOnCanvas(assets: Asset[]) {
 }
 
 /** Entry point for drop, paste and the file picker: enforces the tier's photo limit, imports and places. */
-export async function importFiles(files: File[]) {
+export async function importFiles(files: File[], opts: { slotId?: string } = {}) {
   const images = files.filter((f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name));
   if (!images.length) return;
 
@@ -54,5 +54,23 @@ export async function importFiles(files: File[]) {
     ? format(t.failed, { files: failed.join(", ") })
     : null;
   ui.showNotice([limitNotice, failedNotice].filter(Boolean).join(" ") || null);
-  if (added.length) placeOnCanvas(added);
+  if (!added.length) return;
+  if (opts.slotId) {
+    // Double-clicked frame gets the first photo; any others are placed as usual.
+    useDoc.getState().updateElement(opts.slotId, { assetId: added[0].id });
+    useUi.getState().setSelection([opts.slotId]);
+    if (added.length > 1) placeOnCanvas(added.slice(1));
+    return;
+  }
+  placeOnCanvas(added);
+}
+
+/** Opens the system file picker; used by empty frames (double-click) and the upload panel. */
+export function pickFiles(opts: { slotId?: string; multiple?: boolean } = {}) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*,.heic,.heif";
+  input.multiple = opts.multiple ?? !opts.slotId;
+  input.onchange = () => void importFiles([...(input.files ?? [])], { slotId: opts.slotId });
+  input.click();
 }

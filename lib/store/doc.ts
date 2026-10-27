@@ -169,7 +169,10 @@ export const useDoc = create<DocState>()(
               const width = el.width * s;
               const height = el.height * s;
               const scaled = { ...el, x: cx - width / 2, y: cy - height / 2, width, height };
-              return el.type === "text" ? { ...scaled, fontSize: el.fontSize * s } : scaled;
+              if (el.type === "draw") return { ...scaled, points: el.points.map((v) => v * s), strokeWidth: el.strokeWidth * s };
+              return el.type === "text"
+                ? { ...scaled, fontSize: el.fontSize * s, letterSpacing: el.letterSpacing && el.letterSpacing * s }
+                : scaled;
             });
             return { ...d, elements, format: { ...d.format, w, h } };
           }),

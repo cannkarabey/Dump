@@ -5,7 +5,8 @@
  * One accent + neutral ground. Change the accent here (hex + rgb triplet) to re-tint everything,
  * including tinted shadows.
  */
-:root {
+:root,
+.theme-light {
   --accent: #7c5cff;
   --accent-rgb: 124 92 255;
   /* Darker accent for small text on light grounds: 5.4:1 on white (WCAG AA). */

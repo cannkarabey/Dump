@@ -14,6 +14,9 @@ import { PhotoNode } from "./PhotoNode";
 import { TextNode } from "./TextNode";
 import { ShapeNode } from "./ShapeNode";
 import { StickerNode } from "./StickerNode";
+import { DrawNode, brushLook } from "./DrawNode";
+import { GridOverlay } from "./GridOverlay";
+import { commitStroke } from "@/lib/draw";
 import { InlineTextEditor } from "./InlineTextEditor";
 import { SelectionTransformer } from "./SelectionTransformer";
 import type { El } from "@/lib/types";
@@ -36,6 +39,14 @@ export default function CanvasStage() {
   const zoom = useUi((s) => s.zoom);
   const selection = useUi((s) => s.selection);
   const editingId = useUi((s) => s.editingText);
+  const panMode = useUi((s) => s.panMode);
+  const brush = useUi((s) => s.brush);
+  const drawing = useUi((s) => s.activePanel === "draw" && s.brush.mode === "brush");
+  const erasing = drawing && brush.tool === "eraser";
+  const [stroke, setStroke] = useState<number[] | null>(null);
+  const strokeRef = useRef<number[] | null>(null);
+  const pointerDown = useRef(false);
+  const panning = spaceDown || panMode;
   const editingEl = doc.elements.find((el) => el.id === editingId && el.type === "text");
   const { w, h, pages, mode } = doc.format;
   const totalW = w * pages;
@@ -138,9 +149,55 @@ export default function CanvasStage() {
     };
   }, []);
 
+  // ---- freehand drawing (Draw panel, brush mode)
+  const eraseAt = (stage: Konva.Stage) => {
+    const pointer = stage.getPointerPosition();
+    const hit = pointer && stage.getIntersection(pointer)?.findAncestor(".element", true);
+    const el = hit && useDoc.getState().doc.elements.find((x) => x.id === hit.id());
+    if (el?.type === "draw") useDoc.getState().removeElements([el.id]);
+  };
+
+  const onDrawDown = (stage: Konva.Stage) => {
+    pointerDown.current = true;
+    if (erasing) return eraseAt(stage);
+    const pos = stage.getRelativePointerPosition();
+    if (!pos) return;
+    strokeRef.current = [pos.x, pos.y];
+    setStroke(strokeRef.current);
+  };
+
+  const onPointerMove = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
+    if (!drawing || !pointerDown.current) return;
+    const stage = e.target.getStage();
+    if (!stage) return;
+    if (erasing) return eraseAt(stage);
+    const pos = stage.getRelativePointerPosition();
+    const pts = strokeRef.current;
+    if (!pos || !pts) return;
+    // Skip points closer than ~2 screen px to keep strokes light.
+    const dx = pos.x - pts[pts.length - 2];
+    const dy = pos.y - pts[pts.length - 1];
+    if (dx * dx + dy * dy < (2 / zoom) ** 2) return;
+    strokeRef.current = [...pts, pos.x, pos.y];
+    setStroke(strokeRef.current);
+  };
+
+  const onPointerUp = () => {
+    pointerDown.current = false;
+    const pts = strokeRef.current;
+    strokeRef.current = null;
+    setStroke(null);
+    if (pts && brush.tool !== "eraser") commitStroke(pts, brush.tool, brush.color, brush.size, brush.opacity);
+  };
+
   // ---- selection on empty space
   const onStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     const target = e.target;
+    if (drawing && !panning) {
+      const stage = target.getStage();
+      if (stage) onDrawDown(stage);
+      return;
+    }
     const onEmpty = target === target.getStage() || target.hasName("artboard");
     if (!onEmpty) return;
     useUi.getState().setSelection([]);
@@ -182,7 +239,7 @@ export default function CanvasStage() {
     <div
       ref={containerRef}
       className="absolute inset-0"
-      style={{ cursor: spaceDown ? "grab" : undefined }}
+      style={{ cursor: panning ? "grab" : drawing ? "crosshair" : undefined }}
       onDragOver={(e) => e.preventDefault()}
       onDrop={onDrop}
     >
@@ -204,7 +261,7 @@ export default function CanvasStage() {
           y={pan.y}
           scaleX={zoom}
           scaleY={zoom}
-          draggable={spaceDown}
+          draggable={panning}
           onDragEnd={(e) => {
             if (e.target !== e.target.getStage()) return;
             userAdjusted.current = true;
@@ -213,6 +270,11 @@ export default function CanvasStage() {
           onWheel={onWheel}
           onMouseDown={onStageMouseDown}
           onTouchStart={onStageMouseDown}
+          onMouseMove={onPointerMove}
+          onTouchMove={onPointerMove}
+          onMouseUp={onPointerUp}
+          onTouchEnd={onPointerUp}
+          onMouseLeave={() => pointerDown.current && onPointerUp()}
         >
           <Layer name="bg">
             <Rect
@@ -234,13 +296,27 @@ export default function CanvasStage() {
             clipY={0}
             clipWidth={totalW}
             clipHeight={h}
+            // While drawing, strokes go to the stage; only the eraser needs to hit elements.
+            listening={!drawing || erasing}
           >
             {doc.elements.map((el) => (
-              <ElementNode key={el.id} el={el} single={selection.length === 1} draggable={!spaceDown} />
+              <ElementNode key={el.id} el={el} single={selection.length === 1} draggable={!panning && !drawing} />
             ))}
+            {stroke && brush.tool !== "eraser" && (
+              <Line
+                points={stroke}
+                stroke={brush.color}
+                lineCap="round"
+                lineJoin="round"
+                listening={false}
+                {...brushLook(brush.tool, brush.size * (w / 1080))}
+                opacity={brushLook(brush.tool, 1).opacity * brush.opacity}
+              />
+            )}
           </Layer>
 
           <Layer name="ui">
+            <GridOverlay w={w} h={h} pages={pages} zoom={zoom} />
             {mode === "carousel" &&
               Array.from({ length: pages }, (_, i) => (
                 <Group key={i} listening={false}>
@@ -283,5 +359,7 @@ function ElementNode({ el, single, draggable }: { el: El; single: boolean; dragg
       return <ShapeNode el={el} draggable={draggable} />;
     case "sticker":
       return <StickerNode el={el} draggable={draggable} />;
+    case "draw":
+      return <DrawNode el={el} draggable={draggable} />;
   }
 }

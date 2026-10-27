@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type Konva from "konva";
 import { Group, Image as KImage, Rect, Text } from "react-konva";
 import { useAssets } from "@/lib/store/assets";
@@ -8,6 +8,8 @@ import { coverCrop } from "@/lib/geometry";
 import { fontFamilyFor } from "@/lib/fonts";
 import { stampLabel } from "@/lib/month";
 import { at } from "@/lib/i18n/appDictionary";
+import { pickFiles } from "@/lib/importFiles";
+import { filterAttrs, filterDef } from "@/lib/filters";
 import type { ImageEl, SlotEl } from "@/lib/types";
 import { bakeSize, useElementHandlers } from "./useElementHandlers";
 import { filmHoles, frameInsets } from "./frames";
@@ -35,6 +37,26 @@ export function PhotoNode({
   const inner = { x: inset.left, y: inset.top, width: w - inset.left - inset.right, height: h - inset.top - inset.bottom };
   const s = Math.min(w, h);
   const radius = el.frame && el.frame !== "none" ? 0 : el.radius;
+  const crop = asset ? coverCrop(asset.w, asset.h, inner.width, inner.height) : undefined;
+
+  // Konva filters work on a cached bitmap. Cache near the photo's own resolution (capped) so
+  // exports stay sharp, and re-cache whenever the filter, size or photo changes.
+  const imageRef = useRef<Konva.Image>(null);
+  const def = filterDef(el.filter);
+  useEffect(() => {
+    const node = imageRef.current;
+    if (!node) return;
+    if (!def || !crop) {
+      node.clearCache();
+      node.filters([]);
+      return;
+    }
+    const pixelRatio = Math.min(3, Math.max(1, crop.width / Math.max(1, inner.width)));
+    (node as Konva.Node).setAttrs(filterAttrs(def, inner.width * pixelRatio));
+    node.filters(def.filters);
+    node.cache({ pixelRatio });
+    node.getLayer()?.batchDraw();
+  }, [def, crop?.width, crop?.height, crop?.x, crop?.y, inner.width, inner.height, radius]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Group
@@ -54,6 +76,8 @@ export function PhotoNode({
         onTransformEnd(e);
         setLive(null);
       }}
+      onDblClick={() => el.type === "slot" && !el.assetId && pickFiles({ slotId: el.id })}
+      onDblTap={() => el.type === "slot" && !el.assetId && pickFiles({ slotId: el.id })}
     >
       {el.frame === "polaroid" && (
         <Rect
@@ -78,9 +102,10 @@ export function PhotoNode({
 
       {asset ? (
         <KImage
+          ref={imageRef}
           {...inner}
           image={asset.img}
-          crop={coverCrop(asset.w, asset.h, inner.width, inner.height)}
+          crop={crop}
           cornerRadius={radius}
         />
       ) : el.type === "slot" ? (

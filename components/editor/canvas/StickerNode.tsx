@@ -16,6 +16,8 @@ function useImage(src: string) {
     let el = cache.get(src);
     if (!el) {
       el = new Image();
+      // Remote stickers (CDN emoji) must load with CORS, or exporting the canvas would fail.
+      if (/^https?:/.test(src)) el.crossOrigin = "anonymous";
       el.src = src;
       cache.set(src, el);
     }

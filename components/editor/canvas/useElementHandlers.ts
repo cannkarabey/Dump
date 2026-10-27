@@ -19,7 +19,23 @@ function transformPatch(node: Konva.Node, el: El): ElPatch {
   if (el.type === "text") {
     const scale = node.scaleX();
     node.scale({ x: 1, y: 1 });
-    return { ...pos, fontSize: el.fontSize * scale, width: el.width * scale };
+    return {
+      ...pos,
+      fontSize: el.fontSize * scale,
+      width: el.width * scale,
+      ...(el.letterSpacing ? { letterSpacing: el.letterSpacing * scale } : {}),
+    };
+  }
+  if (el.type === "draw") {
+    const sx = node.scaleX();
+    const sy = node.scaleY();
+    node.scale({ x: 1, y: 1 });
+    return {
+      ...pos,
+      width: el.width * sx,
+      height: el.height * sy,
+      points: el.points.map((v, i) => (i % 2 ? v * sy : v * sx)),
+    };
   }
   return { ...pos, ...bakeSize(node) };
 }

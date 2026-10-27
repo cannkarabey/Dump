@@ -47,6 +47,7 @@ export function templateFromDoc(doc: DumpDoc): Template {
         ];
       case "shape":
         return [{ ...base, type: "shape", fill: el.fill, ...(el.radius ? { nradius: round(el.radius / w) } : {}) }];
+      case "draw":
       case "sticker":
         return [];
     }

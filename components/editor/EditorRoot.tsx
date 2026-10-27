@@ -24,6 +24,7 @@ import { NewDumpModal } from "./NewDumpModal";
 import { PaywallModal } from "./PaywallModal";
 import { ExportDialog } from "./ExportDialog";
 import { useT } from "@/lib/i18n/app";
+import { cn } from "@/lib/cn";
 import { appLocale } from "@/lib/i18n/appDictionary";
 import { localizeTemplate } from "@/lib/templates/i18n";
 
@@ -55,6 +56,7 @@ export function EditorLoading() {
 export function EditorRoot({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { t } = useT();
+  const darkMode = useUi((s) => s.darkMode);
   const templateId = useSearchParams().get("template");
   // Only a saved dump that isn't already in memory needs a loading state.
   const [loading, setLoading] = useState(() => id !== "new" && useDoc.getState().doc.id !== id);
@@ -98,7 +100,10 @@ export function EditorRoot({ params }: { params: Promise<{ id: string }> }) {
     <TooltipProvider>
       <div
         data-dump-id={id}
-        className="grid h-dvh grid-cols-[72px_minmax(220px,320px)_minmax(0,1fr)_minmax(260px,340px)] grid-rows-[56px_1fr] gap-2 overflow-hidden bg-bg p-2 pt-0"
+        className={cn(
+          "grid h-dvh grid-cols-[72px_minmax(220px,320px)_minmax(0,1fr)_minmax(260px,340px)] grid-rows-[56px_1fr] gap-2 overflow-hidden bg-bg p-2 pt-0 text-fg",
+          !darkMode && "theme-light",
+        )}
       >
         <TopBar />
         <LeftRail />

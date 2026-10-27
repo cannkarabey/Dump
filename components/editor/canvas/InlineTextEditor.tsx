@@ -66,6 +66,7 @@ export function InlineTextEditor({ el, zoom, pan }: { el: TextEl; zoom: number; 
         fontSize: el.fontSize * zoom,
         fontWeight: el.fontStyle === "bold" ? 700 : el.fontStyle && /^\d+$/.test(el.fontStyle) ? Number(el.fontStyle) : 400,
         fontStyle: el.fontStyle?.includes("italic") ? "italic" : "normal",
+        letterSpacing: el.letterSpacing ? el.letterSpacing * zoom : undefined,
         lineHeight: 1.05,
         color: el.fill,
         textAlign: el.align,

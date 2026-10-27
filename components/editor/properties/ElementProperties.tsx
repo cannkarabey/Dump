@@ -7,7 +7,9 @@ import { Tooltip } from "@/components/ui/Tooltip";
 import { useDoc, type ElPatch } from "@/lib/store/doc";
 import { useUi } from "@/lib/store/ui";
 import { FONT_OPTIONS } from "@/lib/fonts";
-import type { FontKey, Frame, ImageEl, SlotEl, TextEl } from "@/lib/types";
+import type { DrawEl, FontKey, Frame, ImageEl, ShapeEl, SlotEl, StickerEl, TextEl } from "@/lib/types";
+import { updateWidget } from "@/lib/addElements";
+import { widgetFields } from "@/lib/widgets";
 import { Locked } from "../Locked";
 import { ChipGroup, NumberField, Section, SliderField } from "./fields";
 import { format, useT } from "@/lib/i18n/app";
@@ -92,6 +94,8 @@ export function ElementProperties({ ids }: { ids: string[] }) {
 
       {(el.type === "image" || el.type === "slot") && <PhotoSection el={el} patch={patch} />}
       {el.type === "text" && <TextSection el={el} patch={patch} />}
+      {el.type === "sticker" && el.widget && <WidgetSection key={el.id} el={el} />}
+      {(el.type === "shape" || el.type === "draw") && <PaintSection el={el} patch={patch} />}
     </div>
   );
 }
@@ -190,6 +194,78 @@ function TextSection({ el, patch }: { el: TextEl; patch: (p: ElPatch) => void })
           ]}
         />
       </div>
+      <div className="mt-3">
+        <SliderField
+          label={x.letterSpacing}
+          value={Math.round(((el.letterSpacing ?? 0) / el.fontSize) * 100)}
+          min={-10}
+          max={50}
+          onCommit={(v) => patch({ letterSpacing: (v / 100) * el.fontSize || undefined })}
+          format={(v) => `${Math.round(v)}%`}
+        />
+      </div>
+    </Section>
+  );
+}
+
+/** Editable fields of a Tools widget; each change regenerates its image. */
+function WidgetSection({ el }: { el: StickerEl }) {
+  const { t } = useT();
+  const widget = el.widget!;
+  return (
+    <Section title={t.tools.variants[widget.kind] ?? t.tools.editTitle}>
+      <div className="flex flex-col gap-2">
+        {widgetFields(widget.kind).map((f) => (
+          <label key={f} className="flex flex-col gap-1 text-xs text-muted">
+            {t.tools.fields[f]}
+            {f === "text" ? (
+              <textarea
+                defaultValue={widget.props[f]}
+                rows={3}
+                onBlur={(e) => e.target.value !== widget.props[f] && updateWidget(el, { ...widget.props, [f]: e.target.value })}
+                className="resize-none rounded-xl bg-card p-2.5 text-sm text-fg outline-none"
+              />
+            ) : (
+              <input
+                defaultValue={widget.props[f]}
+                onBlur={(e) => e.target.value !== widget.props[f] && updateWidget(el, { ...widget.props, [f]: e.target.value })}
+                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+                className="h-9 rounded-xl bg-card px-2.5 text-sm text-fg outline-none"
+              />
+            )}
+          </label>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/** Color (and stroke width) for shapes and drawings. */
+function PaintSection({ el, patch }: { el: ShapeEl | DrawEl; patch: (p: ElPatch) => void }) {
+  const x = useT().t.element;
+  const color = el.type === "draw" ? el.stroke : el.fill;
+  const stroked = el.type === "draw" || el.outline || el.kind === "line" || el.kind === "arrow";
+  const sw = el.strokeWidth ?? 4;
+  return (
+    <Section title={x.color}>
+      <input
+        type="color"
+        aria-label={x.color}
+        value={color}
+        onChange={(e) => patch(el.type === "draw" ? { stroke: e.target.value } : { fill: e.target.value })}
+        className="h-9 w-full cursor-pointer rounded-xl bg-card p-1"
+      />
+      {stroked && (
+        <div className="mt-3">
+          <SliderField
+            label={x.strokeWidth}
+            value={sw}
+            min={1}
+            max={Math.max(80, Math.round(sw * 2))}
+            onCommit={(strokeWidth) => patch({ strokeWidth })}
+          />
+        </div>
+      )}
     </Section>
   );
 }

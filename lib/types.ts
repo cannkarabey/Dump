@@ -28,6 +28,24 @@ interface BaseEl {
 
 export type Frame = "none" | "polaroid" | "film";
 
+/** Photo filter id; see lib/filters.ts. */
+export type FilterId =
+  | "none"
+  | "bw"
+  | "sepia"
+  | "vivid"
+  | "fade"
+  | "warm"
+  | "cool"
+  | "invert"
+  | "posterize"
+  | "threshold"
+  | "solarize"
+  | "blur"
+  | "mosaic"
+  | "noise"
+  | "emboss";
+
 export interface ImageEl extends BaseEl {
   type: "image";
   assetId: string;
@@ -35,6 +53,7 @@ export interface ImageEl extends BaseEl {
   frame?: Frame;
   /** Retro date stamp from the photo's EXIF date (Creator+). */
   stamp?: boolean;
+  filter?: FilterId;
 }
 
 /** Template placeholder; renders like an image once it has an asset. */
@@ -44,10 +63,35 @@ export interface SlotEl extends BaseEl {
   radius?: number;
   frame?: Frame;
   stamp?: boolean;
+  filter?: FilterId;
 }
 
 /** Keys of the fonts loaded in app/fonts.ts; resolved to real family names at render time. */
-export type FontKey = "inter" | "playfair" | "space" | "caveat" | "pixelify" | "vt323";
+export type FontKey =
+  | "inter"
+  | "playfair"
+  | "space"
+  | "caveat"
+  | "pixelify"
+  | "vt323"
+  | "jakarta"
+  | "outfit"
+  | "anton"
+  | "bebas"
+  | "archivo"
+  | "syne"
+  | "shrikhand"
+  | "dmserif"
+  | "instrument"
+  | "fraunces"
+  | "pacifico"
+  | "marker"
+  | "cinzel"
+  | "cormorant"
+  | "italiana"
+  | "jetbrains"
+  | "spacemono"
+  | "majormono";
 
 export interface TextEl extends BaseEl {
   type: "text";
@@ -59,21 +103,47 @@ export interface TextEl extends BaseEl {
   fill: string;
   align: "left" | "center" | "right";
   bubble?: boolean;
+  /** Extra space between letters in px (scales with the font size). */
+  letterSpacing?: number;
+}
+
+/** Editable tool output (message bubble, clock…): `src` is regenerated from kind + props. */
+export interface WidgetData {
+  kind: string;
+  props: Record<string, string>;
 }
 
 export interface StickerEl extends BaseEl {
   type: "sticker";
   src: string;
+  widget?: WidgetData;
 }
 
-/** Plain rectangle, e.g. palette chips on the month cover. */
+export type ShapeKind = "rect" | "rounded" | "ellipse" | "triangle" | "star" | "heart" | "line" | "arrow";
+
+/** Rectangle by default (e.g. palette chips on the month cover); other kinds come from Draw → Shapes. */
 export interface ShapeEl extends BaseEl {
   type: "shape";
   fill: string;
   radius?: number;
+  kind?: ShapeKind;
+  /** Outline instead of fill (lines and arrows are always strokes). */
+  outline?: boolean;
+  strokeWidth?: number;
 }
 
-export type El = ImageEl | SlotEl | TextEl | StickerEl | ShapeEl;
+export type BrushTool = "pen" | "marker" | "highlighter";
+
+/** Freehand stroke; points are relative to x/y. */
+export interface DrawEl extends BaseEl {
+  type: "draw";
+  points: number[];
+  stroke: string;
+  strokeWidth: number;
+  tool: BrushTool;
+}
+
+export type El = ImageEl | SlotEl | TextEl | StickerEl | ShapeEl | DrawEl;
 
 export interface DumpDoc {
   id: string;

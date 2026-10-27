@@ -7,6 +7,10 @@ import { TextPanel } from "./panels/TextPanel";
 import { StickersPanel } from "./panels/StickersPanel";
 import { TemplatesPanel } from "./panels/TemplatesPanel";
 import { LayersPanel } from "./panels/LayersPanel";
+import { ToolsPanel } from "./panels/ToolsPanel";
+import { FiltersPanel } from "./panels/FiltersPanel";
+import { DrawPanel } from "./panels/DrawPanel";
+import { SettingsPanel } from "./panels/SettingsPanel";
 
 const PANELS: Record<LeftPanel, () => React.ReactNode> = {
   upload: () => <UploadPanel />,
@@ -14,6 +18,10 @@ const PANELS: Record<LeftPanel, () => React.ReactNode> = {
   text: () => <TextPanel />,
   stickers: () => <StickersPanel />,
   layers: () => <LayersPanel />,
+  tools: () => <ToolsPanel />,
+  filters: () => <FiltersPanel />,
+  draw: () => <DrawPanel />,
+  settings: () => <SettingsPanel />,
 };
 
 export function FlyoutPanel() {

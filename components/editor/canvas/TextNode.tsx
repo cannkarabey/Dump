@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Label, Tag, Text } from "react-konva";
-import { fontFamilyFor } from "@/lib/fonts";
+import { ensureFont, fontFamilyFor, isFontReady } from "@/lib/fonts";
 import { useUi } from "@/lib/store/ui";
 import type { TextEl } from "@/lib/types";
 import { useElementHandlers } from "./useElementHandlers";
@@ -11,10 +12,21 @@ export function TextNode({ el, draggable }: { el: TextEl; draggable: boolean }) 
   const handlers = useElementHandlers(el);
   const editing = useUi((s) => s.editingText === el.id);
   const startEditing = () => !el.locked && useUi.getState().setEditingText(el.id);
+  // Lazily loaded families: remount the Text once the font is in so Konva re-measures it.
+  const [fontReady, setFontReady] = useState(() => isFontReady(el.fontFamily));
+  useEffect(() => {
+    let alive = true;
+    if (!isFontReady(el.fontFamily)) void ensureFont(el.fontFamily).then(() => alive && setFontReady(true));
+    return () => {
+      alive = false;
+    };
+  }, [el.fontFamily]);
 
   const text = (
     <Text
+      key={`${el.fontFamily}-${fontReady}`}
       text={el.text}
+      letterSpacing={el.letterSpacing ?? 0}
       width={el.width}
       fontFamily={fontFamilyFor(el.fontFamily)}
       fontSize={el.fontSize}

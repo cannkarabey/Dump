@@ -36,7 +36,7 @@ export const TIER_LIMITS = {
 export type TierLimits = (typeof TIER_LIMITS)[Tier];
 
 /** Boolean features that can be gated with <Locked feature="...">. */
-export type Feature = "zip" | "stamp" | "brandKit" | "premiumTemplates" | "hiRes";
+export type Feature = "zip" | "stamp" | "brandKit" | "premiumTemplates" | "premiumStickers" | "hiRes";
 
 export function tierAllows(tier: Tier, feature: Feature): boolean {
   const limits = TIER_LIMITS[tier];
@@ -48,6 +48,7 @@ export function tierAllows(tier: Tier, feature: Feature): boolean {
     case "brandKit":
       return limits.brandKit;
     case "premiumTemplates":
+    case "premiumStickers":
       return limits.templates === "all";
     case "hiRes":
       return limits.exportLongSide > TIER_LIMITS.free.exportLongSide;
